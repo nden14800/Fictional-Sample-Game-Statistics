@@ -898,18 +898,39 @@
                     `Date: ${new Date(d.timestamp).toLocaleDateString()}, CCU: ${d.ccu}, Cumulative Positive: ${d.cumulativePositive}, Cumulative Negative: ${d.cumulativeNegative}, Positive Ratio: ${d.ratio}%`
                 ).join('\n');
 
-                const prompt = `以下のデータは、架空のゲーム「Universe Sandbox 3」の${startDate.toLocaleDateString()}から${endDate.toLocaleDateString()}までの統計です。このデータに基づいて、ゲームのパフォーマンスについての簡潔な分析と、ゲームのCCUトレンドを考慮したマーケティング戦略の提案を日本語でMarkdown形式で提供してください。
+                // Corrected typos and structured the prompt
+                const prompt = `
+**ゲーム概要:**
+Universe Sandbox 3は、Giant Armyが開発・販売している宇宙シミュレーションゲームです。
+このゲームの最大の特徴は、宇宙空間の物理法則をリアルタイムでシミュレーションできることにあります。重力、衝突、気候、物質の相互作用などをリアルに再現しており、プレイヤーは宇宙を自由に創造したり、破壊したりすることができます。
+具体的には、以下のようなことができます。
+- **天体の創造と操作:** 惑星、恒星、ブラックホールなどを自由に配置し、その軌道や質量などを変更できます。
+- **壮大な衝突シミュレーション:** 惑星と惑星、恒星と恒星を衝突させ、その結果を観察できます。
+- **気候変動のシミュレーション:** 地球の傾きや太陽からの距離を変え、気候がどう変化するかをモデル化できます。
+- **架空の宇宙空間の作成:** 実際に存在しない独自の太陽系や銀河系を作り出すことができます。
+このように、『Universe Sandbox 3』は、宇宙の壮大なスケールと、物理法則の美しさ、そして天体の儚さを体験できる、シミュレーションと教育の要素を兼ね備えたゲームとなっています。
+
 ---
+
+**分析依頼:**
+以下のデータは、この架空のゲーム「Universe Sandbox 3」の${startDate.toLocaleDateString()}から${endDate.toLocaleDateString()}までの統計です。このゲームの背景情報を踏まえ、データに基づいてゲームのパフォーマンスについての簡潔な分析と、CCUトレンドを考慮したマーケティング戦略の提案を日本語でMarkdown形式で提供してください。
+
+**統計データ:**
 ${dataString}
+
 ---
+
+**出力形式:**
 分析結果と提案は、以下のセクションに分けてください。
 ### ゲームパフォーマンス分析
-### マーケティング戦略提案`;
+### マーケティング戦略提案
+`;
 
                 try {
                     const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                     const payload = { contents: chatHistory };
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                    // Changed the model name as requested
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
                         method: 'POST',
