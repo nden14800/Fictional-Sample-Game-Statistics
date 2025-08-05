@@ -225,6 +225,7 @@
                                 <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
                             </div>
                         </div>
+                        <button id="redraw-chart-btn" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors flex-shrink-0">再描画</button>
                     </div>
                 </div>
                  <div class="text-right mt-2">
@@ -559,7 +560,6 @@
                 if (button.disabled) return;
                 activeChartType = button.dataset.chart;
                 updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
-                // 直接renderChartを呼ぶのではなく、UI更新フローに統一
                 updateUI();
             }));
             
@@ -573,6 +573,7 @@
             const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
             const startDatePicker = document.getElementById('start-date-picker');
             const endDatePicker = document.getElementById('end-date-picker');
+            const redrawButton = document.getElementById('redraw-chart-btn');
 
             dateRangeContainer.addEventListener('click', (e) => {
                 const button = e.target.closest('button');
@@ -593,6 +594,14 @@
             startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
             endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
             
+            redrawButton.addEventListener('click', () => {
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                updateUI();
+            });
+
             const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
             fullDailyData = calculateMovingAverage(dailyData);
             
