@@ -385,14 +385,20 @@
                     // Create rating data point (linked to CCU)
                     const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu, positiveRatingsBoost, negativeRatingsBoost);
                     
+                    // 評価数を累積
                     cumulativePositive += ratingPoint.positive;
                     cumulativeNegative += ratingPoint.negative;
+                    
+                    // 累積評価数に基づいて高評価率を計算
+                    const cumulativeTotalRatings = cumulativePositive + cumulativeNegative;
+                    const cumulativePositiveRatio = cumulativeTotalRatings > 0 ? (cumulativePositive / cumulativeTotalRatings) * 100 : 0;
 
                     data.push({
                         ...ccuPoint,
                         ...ratingPoint,
                         cumulativePositive: cumulativePositive,
                         cumulativeNegative: cumulativeNegative,
+                        ratio: parseFloat(cumulativePositiveRatio.toFixed(2)) // 計算した累積高評価率を格納
                     });
 
                     currentTime.setDate(currentTime.getDate() + 1);
@@ -437,13 +443,10 @@
                 const positiveRatings = Math.floor(dailyPositiveBase) + positiveRatingsBoost;
                 const negativeRatings = Math.floor(dailyNegativeBase) + negativeRatingsBoost;
                 
-                const totalRatings = positiveRatings + negativeRatings;
-                const positiveRatingPercentage = totalRatings > 0 ? (positiveRatings / totalRatings) * 100 : 0;
-
+                // ★★★ 変更点: 高評価率の計算を削除し、日ごとの評価数のみを返す ★★★
                 return {
                     positive: positiveRatings,
-                    negative: negativeRatings,
-                    ratio: parseFloat(positiveRatingPercentage.toFixed(2))
+                    negative: negativeRatings
                 };
             }
 
@@ -510,14 +513,20 @@
                             currentPeak = ccuValue;
                         }
 
+                        // ★★★ 変更点: 補間された累積評価数から高評価率を再計算 ★★★
+                        const interpolatedCumulativePositive = Math.floor(d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio);
+                        const interpolatedCumulativeNegative = Math.floor(d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio);
+                        const interpolatedTotalRatings = interpolatedCumulativePositive + interpolatedCumulativeNegative;
+                        const interpolatedRatio = interpolatedTotalRatings > 0 ? (interpolatedCumulativePositive / interpolatedTotalRatings) * 100 : 0;
+
                         const newPoint = {
                             timestamp: currentTimestamp,
                             ccu: ccuValue,
                             positive: Math.floor(d1.positive + (d2.positive - d1.positive) * ratio),
                             negative: Math.floor(d1.negative + (d2.negative - d1.negative) * ratio),
-                            ratio: parseFloat((d1.ratio + (d2.ratio - d1.ratio) * ratio + randomNoise * 5).toFixed(2)),
-                            cumulativePositive: Math.floor(d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio),
-                            cumulativeNegative: Math.floor(d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio),
+                            ratio: parseFloat(interpolatedRatio.toFixed(2)), // 再計算した高評価率を使用
+                            cumulativePositive: interpolatedCumulativePositive,
+                            cumulativeNegative: interpolatedCumulativeNegative,
                             peakCcu: currentPeak
                         };
                         interpolated.push(newPoint);
