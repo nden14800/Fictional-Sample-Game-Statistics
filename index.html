@@ -25,7 +25,7 @@
         .card {
             background-color: #2d3748; /* Dark mode card background color */
         }
-        input[type="date"], input[type="password"] {
+        input[type="date"] {
             background-color: #4a5568;
             border-color: #4a5568;
         }
@@ -33,18 +33,18 @@
         @media (prefers-color-scheme: light) {
             body {
                 background-color: #f7fafc; /* Light mode background color */
-                color: #1a202c; /* Text color in light mode matches dark mode background */
+                color: #1a202c;
             }
             .card {
-                background-color: #ffffff; /* Light mode card background color */
+                background-color: #ffffff;
             }
-            input[type="date"], input[type="password"] {
+            input[type="date"] {
                 background-color: #edf2f7;
                 border-color: #e2e8f0;
-                color: #1a202c; /* Text color in light mode matches dark mode background */
+                color: #1a202c;
             }
             .light-mode-text-black {
-                color: #1a202c; /* A specific class for this color */
+                color: #1a202c;
             }
             .table-header {
                 background-color: #e2e8f0;
@@ -53,7 +53,6 @@
             .table-row-odd {
                 background-color: #f7fafc;
             }
-            /* Counter text color for light mode */
             .counter-text {
                 color: #1a202c;
             }
@@ -61,7 +60,7 @@
         /* For dark theme */
         @media (prefers-color-scheme: dark) {
             body {
-                color: #f7fafc; /* Text color in dark mode matches light mode background */
+                color: #f7fafc;
             }
             .table-header {
                 background-color: #4a5568;
@@ -70,32 +69,38 @@
             .table-row-odd {
                 background-color: #2d3748;
             }
-            /* Counter text color for dark mode */
             .counter-text {
                 color: #ffffff;
             }
         }
         
-        /* Adjust ApexCharts tooltip style */
         .apexcharts-tooltip {
             font-family: 'Roboto', sans-serif !important;
         }
 
         .active-btn {
-            background-color: #3b82f6; /* bg-blue-500 */
+            background-color: #3b82f6;
             color: white;
         }
 
         .inactive-btn {
-            background-color: #4a5568; /* bg-gray-600 */
+            background-color: #4a5568;
             color: white;
         }
         
         .inactive-btn:hover {
-            background-color: #6b7280; /* hover:bg-gray-700 */
+            background-color: #6b7280;
+        }
+        
+        .disabled-btn {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #4a5568 !important;
+        }
+        .disabled-btn:hover {
+            background-color: #4a5568 !important;
         }
 
-        /* Table specific styles */
         .data-table-container {
             max-height: 500px;
             overflow-y: auto;
@@ -115,7 +120,7 @@
         </header>
 
         <!-- Counters section -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
             <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
                 <div class="flex items-center text-xl font-bold text-blue-300">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people mr-2" viewBox="0 0 16 16">
@@ -124,6 +129,15 @@
                     <span>CCU</span>
                 </div>
                 <p id="ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+            </div>
+            <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                <div class="flex items-center text-xl font-bold text-cyan-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up-arrow mr-2" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                    <span>期間内平均CCU</span>
+                </div>
+                <p id="avg-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
             </div>
             <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
                 <div class="flex items-center text-xl font-bold text-green-300">
@@ -137,7 +151,7 @@
             <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
                 <div class="flex items-center text-xl font-bold text-red-300">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hand-thumbs-down mr-2" viewBox="0 0 16 16">
-                        <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077-.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682 1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1"/>
+                        <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077-.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682-1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1"/>
                     </svg>
                     <span>合計低評価数</span>
                 </div>
@@ -166,15 +180,23 @@
         <!-- Chart section -->
         <div class="card p-6 rounded-xl shadow-lg">
             <div class="flex flex-col space-y-4 mb-4">
-                <!-- Granularity buttons -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
+                    <div id="chart-type-buttons">
+                        <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
+                        <button data-chart="daily-ratings" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">日次評価数</button>
+                        <button data-chart="cumulative-ratings" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計評価数</button>
+                        <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
+                    </div>
+                </div>
                 <div class="flex flex-wrap gap-2 items-center">
                     <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
-                    <button id="btn-30m" data-granularity="30m" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">30分</button>
-                    <button id="btn-1h" data-granularity="1h" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1時間</button>
-                    <button id="btn-1d" data-granularity="1d" class="px-4 py-2 active-btn font-bold rounded-lg transition-colors">1日</button>
+                    <div id="granularity-buttons">
+                        <button data-granularity="30m" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">30分</button>
+                        <button data-granularity="1h" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">1時間</button>
+                        <button data-granularity="1d" class="px-4 py-2 granularity-btn active-btn font-bold rounded-lg transition-colors">1日</button>
+                    </div>
                 </div>
-
-                <!-- Period buttons -->
                 <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                     <div id="date-range-buttons" class="flex flex-wrap gap-2">
                         <button data-days="1" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1日</button>
@@ -223,49 +245,23 @@
                             <th class="p-3 font-semibold text-sm rounded-tl-lg">日付</th>
                             <th class="p-3 font-semibold text-sm">CCU</th>
                             <th class="p-3 font-semibold text-sm">CCU (%)</th>
-                            <th class="p-3 font-semibold text-sm">合計高評価数</th>
-                            <th class="p-3 font-semibold text-sm">高評価数 (%)</th>
-                            <th class="p-3 font-semibold text-sm">合計低評価数</th>
-                            <th class="p-3 font-semibold text-sm">低評価数 (%)</th>
+                            <th class="p-3 font-semibold text-sm">平均CCU</th>
+                            <th class="p-3 font-semibold text-sm">平均CCU (%)</th>
+                            <th class="p-3 font-semibold text-sm">日次高評価</th>
+                            <th class="p-3 font-semibold text-sm">日次高評価 (%)</th>
+                            <th class="p-3 font-semibold text-sm">日次低評価</th>
+                            <th class="p-3 font-semibold text-sm">日次低評価 (%)</th>
+                            <th class="p-3 font-semibold text-sm">合計高評価</th>
+                            <th class="p-3 font-semibold text-sm">合計高評価 (%)</th>
+                            <th class="p-3 font-semibold text-sm">合計低評価</th>
+                            <th class="p-3 font-semibold text-sm">合計低評価 (%)</th>
                             <th class="p-3 font-semibold text-sm">高評価率</th>
-                            <th class="p-3 font-semibold text-sm">高評価率 (%)</th>
-                            <th class="p-3 font-semibold text-sm">期間内ピークCCU</th>
-                            <th class="p-3 font-semibold text-sm rounded-tr-lg">ピークCCU (%)</th>
+                            <th class="p-3 font-semibold text-sm rounded-tr-lg">高評価率 (%)</th>
                         </tr>
                     </thead>
                     <tbody id="data-table-body">
-                        <!-- Data rows will be inserted here by JavaScript -->
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Gemini Insights Section -->
-        <div class="card p-6 rounded-xl shadow-lg mt-8">
-            <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-500 mb-4">
-                Gemini Insights
-            </h2>
-            <!-- API Key Input -->
-            <div class="mb-4">
-                <label for="api-key-input" class="block text-gray-300 light-mode-text-black mb-2">Gemini APIキー (クライアントサイドで処理されるため、自己責任でご利用ください):</label>
-                <input type="password" id="api-key-input" placeholder="ここにAPIキーを入力してください" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white">
-            </div>
-            <button id="generate-insights-btn" class="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold rounded-xl shadow-lg hover:from-green-600 hover:to-teal-700 transform transition-transform duration-300 hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stars mr-2" viewBox="0 0 16 16">
-                  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-                </svg>
-                <span>統計分析とマーケティング戦略を生成</span>
-            </button>
-            <div id="insights-output" class="mt-4 p-4 bg-gray-700 rounded-lg whitespace-pre-wrap text-sm text-gray-200 hidden">
-                <!-- Insights will be displayed here -->
-            </div>
-            <div id="loading-spinner" class="mt-4 hidden">
-                <div class="flex items-center justify-center space-x-2">
-                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
-                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-75"></div>
-                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-150"></div>
-                    <span class="text-gray-400">分析を生成中...</span>
-                </div>
             </div>
         </div>
     </div>
@@ -274,781 +270,322 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <script>
-        // Define app ID for Firestore usage
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // JavaScript code to generate data and draw the chart
         document.addEventListener('DOMContentLoaded', () => {
 
-            // Array to store all data points
             let fullDailyData = [];
-            // Current chart object
             let chart;
-            // Current granularity of the timestamps
             let currentGranularity = '1d';
-            // Latest filtered and interpolated data
+            let activeChartType = 'ccu';
             let currentProcessedData = [];
 
-
-            // Define the start and end dates of the dataset
             const datasetStartDate = new Date('2025-12-31T00:00:00Z');
             const datasetEndDate = new Date('2030-01-01T00:00:00Z');
 
-            /**
-             * Generates realistic data.
-             * @param {Date} startDate - Start date of the data.
-             * @param {Date} endDate - End date of the data.
-             * @returns {Array<Object>} - An array of generated data.
-             */
             function generateDailyData(startDate, endDate) {
                 const data = [];
                 let currentTime = new Date(startDate);
-                
                 let cumulativePositive = 0;
                 let cumulativeNegative = 0;
-
-                // User-specified CCU data points
-                const ccuPoints = [
-                    { date: new Date('2026-01-01'), ccu: 10000 },
-                    { date: new Date('2027-01-01'), ccu: 35000000 },
-                    { date: new Date('2028-01-01'), ccu: 30000000 },
-                    { date: new Date('2029-01-01'), ccu: 22500000 },
-                    { date: new Date('2030-01-01'), ccu: 19250000 }
-                ];
-                
-                // Determine CCU fluctuations for the entire period
+                const ccuPoints = [ { date: new Date('2026-01-01'), ccu: 10000 }, { date: new Date('2027-01-01'), ccu: 35000000 }, { date: new Date('2028-01-01'), ccu: 30000000 }, { date: new Date('2029-01-01'), ccu: 22500000 }, { date: new Date('2030-01-01'), ccu: 19250000 } ];
                 const ccuTimeline = {};
                 for (let i = 0; i < ccuPoints.length - 1; i++) {
                     const startPoint = ccuPoints[i];
                     const endPoint = ccuPoints[i + 1];
-
                     let currentDate = new Date(startPoint.date);
                     const totalDays = (endPoint.date.getTime() - startPoint.date.getTime()) / (1000 * 60 * 60 * 24);
-
                     let dayCount = 0;
                     while (currentDate < endPoint.date) {
                         const progress = dayCount / totalDays;
                         let baseCcu;
-                        
                         const startYear = startPoint.date.getFullYear();
-                        if (startYear === 2026) {
-                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * (1 - Math.exp(-progress * 5));
-                        } else if (startYear === 2027) {
-                            baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
-                        } else if (startYear === 2028) {
-                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
-                        } else if (startYear === 2029) {
-                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
-                        }
-
+                        if (startYear === 2026) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * (1 - Math.exp(-progress * 5));
+                        else if (startYear === 2027) baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
+                        else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
+                        else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
                         const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
                         ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
-                        
                         currentDate.setDate(currentDate.getDate() + 1);
                         dayCount++;
                     }
                 }
-
                 while (currentTime <= endDate) {
                     const dateString = currentTime.toISOString().slice(0, 10);
                     let baseCcu = ccuTimeline[dateString] || 10000;
-                    
-                    // Simulate weekend boost
-                    const dayOfWeek = currentTime.getDay(); // 0: Sunday, 6: Saturday
-                    if (dayOfWeek === 0 || dayOfWeek === 6) {
-                        baseCcu *= 1.4; // 40% boost on weekends
-                    }
-                    
-                    // Simulate monthly updates
-                    const isUpdateDay = currentTime.getDate() === 1 && currentTime.getMonth() !== startDate.getMonth();
-
-                    // Boost ratings on update days
-                    let positiveRatingsBoost = 0;
-                    let negativeRatingsBoost = 0;
-                    if (isUpdateDay) {
-                        positiveRatingsBoost = 200000;
-                        negativeRatingsBoost = 15000;
-                    }
-
-                    // Create CCU data point
+                    if (currentTime.getDay() === 0 || currentTime.getDay() === 6) baseCcu *= 1.4;
+                    const isUpdateDay = currentTime.getDate() === 1;
+                    let positiveRatingsBoost = 0, negativeRatingsBoost = 0;
+                    if (isUpdateDay) { positiveRatingsBoost = 200000; negativeRatingsBoost = 15000; }
                     const ccuPoint = createCcuDataPoint(currentTime, baseCcu, isUpdateDay);
-
-                    // Create rating data point (linked to CCU)
                     const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu, positiveRatingsBoost, negativeRatingsBoost);
-                    
-                    // 評価数を累積
                     cumulativePositive += ratingPoint.positive;
                     cumulativeNegative += ratingPoint.negative;
-                    
-                    // 累積評価数に基づいて高評価率を計算
                     const cumulativeTotalRatings = cumulativePositive + cumulativeNegative;
                     const cumulativePositiveRatio = cumulativeTotalRatings > 0 ? (cumulativePositive / cumulativeTotalRatings) * 100 : 0;
-
-                    data.push({
-                        ...ccuPoint,
-                        ...ratingPoint,
-                        cumulativePositive: cumulativePositive,
-                        cumulativeNegative: cumulativeNegative,
-                        ratio: parseFloat(cumulativePositiveRatio.toFixed(2)) // 計算した累積高評価率を格納
-                    });
-
+                    data.push({ ...ccuPoint, ...ratingPoint, cumulativePositive, cumulativeNegative, ratio: parseFloat(cumulativePositiveRatio.toFixed(2)) });
                     currentTime.setDate(currentTime.getDate() + 1);
                 }
                 return data;
             }
+            
+            function calculateMovingAverage(data, windowSize = 14) {
+                return data.map((d, i, arr) => {
+                    const start = Math.max(0, i - windowSize + 1);
+                    const end = i + 1;
+                    const windowData = arr.slice(start, end);
+                    const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
+                    return { ...d, avgCcu: Math.round(sum / windowData.length) };
+                });
+            }
 
-            /**
-             * Helper function to create a CCU data point.
-             * @param {Date} date - The timestamp.
-             * @param {number} ccu - The concurrent user count.
-             * @param {boolean} isUpdateDay - Whether it's an update day.
-             * @returns {Object} - The CCU data.
-             */
             function createCcuDataPoint(date, ccu, isUpdateDay) {
-                let actualCcu = ccu;
-
-                // On update days, simulate a sharp increase
-                if (isUpdateDay) {
-                    const updatePeak = ccu * 2; // Double on update
-                    actualCcu = updatePeak;
-                }
-
-                return {
-                    timestamp: date.getTime(),
-                    ccu: Math.floor(actualCcu),
-                };
+                return { timestamp: date.getTime(), ccu: Math.floor(isUpdateDay ? ccu * 2 : ccu) };
             }
 
-            /**
-             * Helper function to create a rating data point.
-             * @param {Date} date - The timestamp.
-             * @param {number} ccu - The CCU for the day.
-             * @param {number} positiveRatingsBoost - Boost in positive ratings for updates.
-             * @param {number} negativeRatingsBoost - Boost in negative ratings for updates.
-             * @returns {Object} - The ratings data.
-             */
             function createRatingDataPoint(date, ccu, positiveRatingsBoost, negativeRatingsBoost) {
-                const dailyPositiveBase = ccu * (0.001 + Math.random() * 0.001); // 0.1% to 0.2%
-                const dailyNegativeBase = ccu * (0.0001 + Math.random() * 0.0001); // 0.01% to 0.02%
-                
-                const positiveRatings = Math.floor(dailyPositiveBase) + positiveRatingsBoost;
-                const negativeRatings = Math.floor(dailyNegativeBase) + negativeRatingsBoost;
-                
-                // ★★★ 変更点: 高評価率の計算を削除し、日ごとの評価数のみを返す ★★★
-                return {
-                    positive: positiveRatings,
-                    negative: negativeRatings
-                };
+                const dailyPositiveBase = ccu * (0.001 + Math.random() * 0.001);
+                const dailyNegativeBase = ccu * (0.0001 + Math.random() * 0.0001);
+                return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
             }
 
-            /**
-             * Filters data based on the selected date range.
-             * @param {Array<Object>} allData - All data.
-             * @param {Date} startDate - Start date.
-             * @param {Date} endDate - End date.
-             * @returns {Array<Object>} - The filtered data.
-             */
             function filterDataByDateRange(allData, startDate, endDate) {
                 const startTimestamp = startDate.getTime();
                 const endTimestamp = endDate.getTime();
                 return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
             }
 
-            /**
-             * Interpolates data based on granularity (with diurnal cycles).
-             * @param {Array<Object>} dailyData - Data in daily intervals.
-             * @param {string} granularity - '30m', '1h', or '1d'.
-             * @returns {Array<Object>} - The interpolated data.
-             */
             function interpolateData(dailyData, granularity) {
-                let peakSoFar = 0;
-                const dataWithPeak = dailyData.map(d => {
-                    if (d.ccu > peakSoFar) peakSoFar = d.ccu;
-                    return {...d, peakCcu: peakSoFar};
-                });
-                
-                if (granularity === '1d' || dataWithPeak.length <= 1) {
-                    return dataWithPeak;
-                }
-
+                if (granularity === '1d' || dailyData.length <= 1) return dailyData;
                 const interpolated = [];
-                const interval = granularity === '30m' ? 30 * 60 * 1000 : 60 * 60 * 1000;
-                const dailyCycle = 24 * 60 * 60 * 1000;
-                
-                let currentPeak = 0;
-
-                for (let i = 0; i < dataWithPeak.length - 1; i++) {
-                    const d1 = dataWithPeak[i];
-                    const d2 = dataWithPeak[i + 1];
-                    
-                    if (d1.ccu > currentPeak) {
-                        currentPeak = d1.ccu;
-                    }
-
-                    interpolated.push({ ...d1, peakCcu: currentPeak });
-
-                    let currentTimestamp = d1.timestamp + interval;
+                const intervalMs = granularity === '30m' ? 30 * 60 * 1000 : 60 * 60 * 1000;
+                for (let i = 0; i < dailyData.length - 1; i++) {
+                    const d1 = dailyData[i];
+                    const d2 = dailyData[i + 1];
+                    let lastKnownPoint = { ...d1 };
+                    interpolated.push(lastKnownPoint);
+                    let currentTimestamp = d1.timestamp + intervalMs;
                     while (currentTimestamp < d2.timestamp) {
-                        const dayProgress = ((currentTimestamp - d1.timestamp) % dailyCycle) / dailyCycle;
-                        
-                        const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
-                        
                         const ratio = (currentTimestamp - d1.timestamp) / (d2.timestamp - d1.timestamp);
+                        const dayProgress = ((currentTimestamp - d1.timestamp) % (24 * 3600 * 1000)) / (24 * 3600 * 1000);
+                        const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
                         const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
-                        
                         const randomNoise = (Math.random() - 0.5) * 0.1;
-                        
                         const ccuValue = Math.floor(linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise);
-                        
-                        if (ccuValue > currentPeak) {
-                            currentPeak = ccuValue;
-                        }
-
-                        // ★★★ 変更点: 補間された累積評価数から高評価率を再計算 ★★★
-                        const interpolatedCumulativePositive = Math.floor(d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio);
-                        const interpolatedCumulativeNegative = Math.floor(d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio);
-                        const interpolatedTotalRatings = interpolatedCumulativePositive + interpolatedCumulativeNegative;
-                        const interpolatedRatio = interpolatedTotalRatings > 0 ? (interpolatedCumulativePositive / interpolatedTotalRatings) * 100 : 0;
-
+                        const currentCumulativePositive = d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio;
+                        const currentCumulativeNegative = d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio;
+                        const totalRatings = currentCumulativePositive + currentCumulativeNegative;
+                        const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
                         const newPoint = {
-                            timestamp: currentTimestamp,
-                            ccu: ccuValue,
-                            positive: Math.floor(d1.positive + (d2.positive - d1.positive) * ratio),
-                            negative: Math.floor(d1.negative + (d2.negative - d1.negative) * ratio),
-                            ratio: parseFloat(interpolatedRatio.toFixed(2)), // 再計算した高評価率を使用
-                            cumulativePositive: interpolatedCumulativePositive,
-                            cumulativeNegative: interpolatedCumulativeNegative,
-                            peakCcu: currentPeak
+                            timestamp: currentTimestamp, ccu: ccuValue,
+                            avgCcu: Math.round(d1.avgCcu + (d2.avgCcu - d1.avgCcu) * ratio),
+                            positive: Math.max(0, Math.round(currentCumulativePositive - lastKnownPoint.cumulativePositive)),
+                            negative: Math.max(0, Math.round(currentCumulativeNegative - lastKnownPoint.cumulativeNegative)),
+                            ratio: parseFloat(currentRatio.toFixed(2)),
+                            cumulativePositive: Math.round(currentCumulativePositive),
+                            cumulativeNegative: Math.round(currentCumulativeNegative),
                         };
                         interpolated.push(newPoint);
-                        currentTimestamp += interval;
+                        lastKnownPoint = { ...newPoint };
+                        currentTimestamp += intervalMs;
                     }
                 }
-                
-                const lastDataPoint = dataWithPeak[dataWithPeak.length - 1];
-                if (lastDataPoint && lastDataPoint.ccu > currentPeak) {
-                    currentPeak = lastDataPoint.ccu;
-                }
-                if(lastDataPoint) {
-                    interpolated.push({ ...lastDataPoint, peakCcu: currentPeak });
-                }
-                
+                if (dailyData.length > 0) interpolated.push({ ...dailyData[dailyData.length - 1] });
                 return interpolated;
             }
 
-            /**
-             * Calculates the percentage change between consecutive data points for each metric.
-             * @param {Array<Object>} data - The data to calculate changes for.
-             * @returns {Array<Object>} - The data with added percentage change properties.
-             */
             function calculatePercentageChange(data) {
-                const initialNulls = { ccuChange: null, positiveChange: null, negativeChange: null, ratioChange: null, peakCcuChange: null };
-                if (data.length <= 1) {
-                    return data.map(d => ({ ...d, ...initialNulls }));
-                }
-                
+                const initialNulls = { ccuChange: null, avgCcuChange: null, positiveChange: null, negativeChange: null, cumulativePositiveChange: null, cumulativeNegativeChange: null, ratioChange: null };
+                if (data.length <= 1) return data.map(d => ({ ...d, ...initialNulls }));
                 return data.map((d, index) => {
-                    if (index === 0) {
-                        return { ...d, ...initialNulls };
-                    }
-                    
+                    if (index === 0) return { ...d, ...initialNulls };
                     const prevD = data[index - 1];
-                    const ccuChange = prevD.ccu === 0 ? null : ((d.ccu - prevD.ccu) / prevD.ccu) * 100;
-                    const positiveChange = prevD.cumulativePositive === 0 ? null : ((d.cumulativePositive - prevD.cumulativePositive) / prevD.cumulativePositive) * 100;
-                    const negativeChange = prevD.cumulativeNegative === 0 ? null : ((d.cumulativeNegative - prevD.cumulativeNegative) / prevD.cumulativeNegative) * 100;
-                    const ratioChange = prevD.ratio === 0 ? null : ((d.ratio - prevD.ratio) / prevD.ratio) * 100;
-                    const peakCcuChange = prevD.peakCcu === 0 ? null : ((d.peakCcu - prevD.peakCcu) / prevD.peakCcu) * 100;
-
-                    return { ...d, ccuChange, positiveChange, negativeChange, ratioChange, peakCcuChange };
+                    const getValue = (val) => (val === null || val === undefined) ? 0 : val;
+                    const ccuChange = getValue(prevD.ccu) === 0 ? null : ((getValue(d.ccu) - getValue(prevD.ccu)) / getValue(prevD.ccu)) * 100;
+                    const avgCcuChange = getValue(prevD.avgCcu) === 0 ? null : ((getValue(d.avgCcu) - getValue(prevD.avgCcu)) / getValue(prevD.avgCcu)) * 100;
+                    const positiveChange = getValue(prevD.positive) === 0 ? null : ((getValue(d.positive) - getValue(prevD.positive)) / getValue(prevD.positive)) * 100;
+                    const negativeChange = getValue(prevD.negative) === 0 ? null : ((getValue(d.negative) - getValue(prevD.negative)) / getValue(prevD.negative)) * 100;
+                    const cumulativePositiveChange = getValue(prevD.cumulativePositive) === 0 ? null : ((getValue(d.cumulativePositive) - getValue(prevD.cumulativePositive)) / getValue(prevD.cumulativePositive)) * 100;
+                    const cumulativeNegativeChange = getValue(prevD.cumulativeNegative) === 0 ? null : ((getValue(d.cumulativeNegative) - getValue(prevD.cumulativeNegative)) / getValue(prevD.cumulativeNegative)) * 100;
+                    const ratioChange = getValue(prevD.ratio) === 0 ? null : ((getValue(d.ratio) - getValue(prevD.ratio)) / getValue(prevD.ratio)) * 100;
+                    return { ...d, ccuChange, avgCcuChange, positiveChange, negativeChange, cumulativePositiveChange, cumulativeNegativeChange, ratioChange };
                 });
             }
 
-
-            /**
-             * Renders or updates the chart.
-             * @param {Array<Object>} data - The data to plot.
-             */
             function renderChart(data) {
-                if (!data || data.length === 0) {
-                    if (chart) chart.destroy();
-                    chart = null;
-                    document.querySelector("#apex-chart").innerHTML = "";
-                    return;
-                }
+                const chartContainer = document.querySelector("#apex-chart");
+                if (chart) { chart.destroy(); chart = null; }
+                chartContainer.innerHTML = "";
+                if (!data || data.length === 0) return;
                 
-                const seriesColors = ['#008FFB', '#00E396', '#FF4560', '#FEB019', '#775DD0'];
-
-                const ccuSeries = data.map(d => [d.timestamp, d.ccu]);
-                const positiveSeries = data.map(d => [d.timestamp, d.cumulativePositive]);
-                const negativeSeries = data.map(d => [d.timestamp, d.cumulativeNegative]);
-                const ratioSeries = data.map(d => [d.timestamp, d.ratio]);
-                const periodPeakCcuSeries = data.map(d => [d.timestamp, d.peakCcu]);
-
-                const isLightMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-                
-                // ★★★ 修正箇所 ★★★
-                // ダークモードの時は 'dark' テーマを、ライトモードの時は 'light' テーマをツールチップに適用します。
+                const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
                 const tooltipTheme = isLightMode ? 'light' : 'dark';
+                const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
+                const labelColor = isLightMode ? '#333' : '#fff';
+
+                let series, yaxis, colors, title, stroke, chartType;
+
+                switch(activeChartType) {
+                    case 'ccu':
+                        chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() } }; break;
+                    case 'daily-ratings':
+                        chartType = 'bar'; series = [ { name: '日次高評価数', data: data.map(d => [d.timestamp, d.positive]) }, { name: '日次低評価数', data: data.map(d => [d.timestamp, d.negative]) } ]; colors = ['#34D399', '#F87171']; title = '日次評価数'; stroke = { show: true, width: 2, colors: ['transparent'] }; yaxis = { title: { text: '評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() } }; break;
+                    case 'cumulative-ratings':
+                        chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() }, stacked: false }; break;
+                    case 'ratio':
+                        chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 };
+                        yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
+                }
 
                 const options = {
-                    series: [
-                        { name: 'CCU', data: ccuSeries },
-                        { name: '合計高評価数', data: positiveSeries },
-                        { name: '合計低評価数', data: negativeSeries },
-                        { name: '高評価率', data: ratioSeries },
-                        { name: '期間内ピークCCU', data: periodPeakCcuSeries }
-                    ],
-                    chart: {
-                        id: 'universe-sandbox-chart',
-                        type: 'line',
-                        height: 400,
-                        toolbar: { show: true, autoSelected: 'zoom' },
-                        background: isLightMode ? '#ffffff' : '#2d3748',
-                        fontFamily: 'Roboto, sans-serif'
-                    },
-                    colors: seriesColors,
-                    stroke: { curve: 'smooth', width: [2, 2, 2, 2, 1.5] },
-                    xaxis: {
-                        type: 'datetime',
-                        labels: {
-                           datetimeUTC: false,
-                           format: currentGranularity === '1d' ? 'yy/MM/dd' : 'MM/dd HH:mm',
-                           style: { colors: isLightMode ? '#333' : '#fff' }
-                        },
-                        tooltip: { enabled: true }
-                    },
-                    yaxis: [
-                        { // Y-axis 1: CCU (Left)
-                            seriesName: 'CCU',
-                            axisTicks: { show: true },
-                            axisBorder: { show: true, color: seriesColors[0] },
-                            labels: {
-                                style: { colors: seriesColors[0] },
-                                formatter: val => val !== undefined ? Math.round(val).toLocaleString() : '0'
-                            },
-                            title: { text: 'CCU', style: { color: seriesColors[0] } },
-                        },
-                        { // Y-axis 2: Positive Ratings (Right)
-                            seriesName: '合計高評価数',
-                            opposite: true,
-                            axisTicks: { show: true },
-                            axisBorder: { show: true, color: seriesColors[1] },
-                            labels: {
-                                style: { colors: seriesColors[1] },
-                                formatter: val => val !== undefined ? Math.round(val).toLocaleString() : '0'
-                            },
-                            title: { text: '合計高評価数', style: { color: seriesColors[1] } },
-                        },
-                        { // Y-axis 3: Negative Ratings (Right)
-                            seriesName: '合計低評価数',
-                            opposite: true,
-                            axisTicks: { show: true },
-                            axisBorder: { show: true, color: seriesColors[2] },
-                            labels: {
-                                style: { colors: seriesColors[2] },
-                                formatter: val => val !== undefined ? Math.round(val).toLocaleString() : '0'
-                            },
-                            title: { text: '合計低評価数', style: { color: seriesColors[2] } },
-                        },
-                        { // Y-axis 4: Ratio (Right)
-                            seriesName: '高評価率',
-                            opposite: true,
-                            min: 0,
-                            max: 100,
-                            axisTicks: { show: true },
-                            axisBorder: { show: true, color: seriesColors[3] },
-                            labels: {
-                                style: { colors: seriesColors[3] },
-                                formatter: val => `${val ? val.toFixed(1) : '0'}%`
-                            },
-                            title: { text: '高評価率 (%)', style: { color: seriesColors[3] } },
-                        },
-                        { // Y-axis 5: Peak CCU (Right)
-                            seriesName: '期間内ピークCCU',
-                            opposite: true,
-                            axisTicks: { show: true },
-                            axisBorder: { show: true, color: seriesColors[4] },
-                            labels: {
-                                style: { colors: seriesColors[4] },
-                                formatter: val => val !== undefined ? Math.round(val).toLocaleString() : '0'
-                            },
-                            title: { text: '期間内ピークCCU', style: { color: seriesColors[4] } },
-                        }
-                    ],
-                    tooltip: {
-                        x: { format: 'yyyy/MM/dd HH:mm' },
-                        y: {
-                            formatter: (val, opts) => {
-                                const dataIndex = opts.dataPointIndex;
-                                const seriesIndex = opts.seriesIndex;
-                                const dataPoint = data[dataIndex];
-                                
-                                let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A';
-                                let changeText = '';
-                                
-                                if (dataPoint) {
-                                    let change = null;
-                                    switch(seriesIndex) {
-                                        case 0: change = dataPoint.ccuChange; break;
-                                        case 1: change = dataPoint.positiveChange; break;
-                                        case 2: change = dataPoint.negativeChange; break;
-                                        case 3: 
-                                            change = dataPoint.ratioChange;
-                                            formattedValue = `${val ? val.toFixed(2) : '0.00'}%`;
-                                            break;
-                                        case 4: change = dataPoint.peakCcuChange; break;
-                                    }
-
-                                    if (change !== null && change !== undefined) {
-                                        const arrow = change >= 0 ? '▲' : '▼';
-                                        const color = change >= 0 ? 'text-green-400' : 'text-red-400';
-                                        changeText = `<span class="${color} ml-2">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
-                                    }
-                                }
-                               
-                                return `${formattedValue} ${changeText}`;
-                            }
-                        },
-                        theme: tooltipTheme, // 修正したテーマを適用
-                        shared: true,
-                        intersect: false
-                    },
+                    series: series,
+                    chart: { id: 'universe-sandbox-chart', type: chartType, height: 400, toolbar: { show: true, autoSelected: 'zoom' }, background: isLightMode ? '#ffffff' : '#2d3748', fontFamily: 'Roboto, sans-serif', stacked: chartType === 'bar' },
+                    colors: colors,
+                    stroke: stroke,
+                    title: { text: title, align: 'left', style: { color: labelColor } },
+                    xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
+                    yaxis: yaxis,
+                    tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '日次高評価数': change = dataPoint.positiveChange; break; case '日次低評価数': change = dataPoint.negativeChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
                     dataLabels: { enabled: false },
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'left',
-                        labels: { colors: isLightMode ? '#333' : '#fff' }
-                    },
-                    grid: { borderColor: isLightMode ? '#e2e8f0' : '#4a5568' }
+                    legend: { position: 'top', horizontalAlign: 'right', labels: { colors: labelColor } },
+                    grid: { borderColor: gridBorderColor },
+                    plotOptions: { bar: { columnWidth: '70%', dataLabels: { position: 'top' }, stacked: true } },
                 };
-
-                if (chart) {
-                    chart.updateOptions(options);
-                } else {
-                    chart = new ApexCharts(document.querySelector("#apex-chart"), options);
-                    chart.render();
-                }
+                
+                chart = new ApexCharts(chartContainer, options);
+                chart.render();
             }
 
-            /**
-             * Renders the data in a table.
-             * @param {Array<Object>} data - The data to display in the table.
-             */
             function renderTable(data) {
                 const tableBody = document.getElementById('data-table-body');
-                tableBody.innerHTML = ''; // Clear existing rows
-
+                tableBody.innerHTML = '';
                 if (!data || data.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="11" class="p-3 text-center text-gray-500">表示するデータがありません。</td>`;
-                    tableBody.appendChild(row);
+                    tableBody.innerHTML = `<tr><td colspan="15" class="p-3 text-center text-gray-500">表示するデータがありません。</td></tr>`;
                     return;
                 }
-
                 const reversedData = [...data].reverse();
-
                 reversedData.forEach((d, index) => {
                     const row = document.createElement('tr');
-                    row.classList.add('transition-colors', 'duration-200');
-                    if (index % 2 === 1) {
-                        row.classList.add('table-row-odd');
-                    } else {
-                        row.classList.add('hover:bg-gray-700', 'light:hover:bg-gray-100');
-                    }
-                    
+                    row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
                     const date = new Date(d.timestamp);
-                    let dateString;
-                    if (currentGranularity === '1d') {
-                        dateString = date.toLocaleDateString();
-                    } else {
-                        dateString = date.toLocaleString();
-                    }
-
+                    let dateString = currentGranularity === '1d' ? date.toLocaleDateString() : date.toLocaleString();
                     const formatChange = (change) => {
-                        if (change === null || change === undefined) return '-';
+                        if (change === null || !isFinite(change)) return '-';
                         const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
                         const arrow = change >= 0 ? '▲' : '▼';
                         return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
                     };
-
                     row.innerHTML = `
                         <td class="p-3 text-sm">${dateString}</td>
-                        <td class="p-3 text-sm">${d.ccu.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td>
                         <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
-                        <td class="p-3 text-sm">${d.cumulativePositive.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
+                        <td class="p-3 text-sm">${(d.positive || 0).toLocaleString()}</td>
                         <td class="p-3 text-sm">${formatChange(d.positiveChange)}</td>
-                        <td class="p-3 text-sm">${d.cumulativeNegative.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${(d.negative || 0).toLocaleString()}</td>
                         <td class="p-3 text-sm">${formatChange(d.negativeChange)}</td>
-                        <td class="p-3 text-sm">${d.ratio.toFixed(2)}%</td>
+                        <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
+                        <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
+                        <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td>
                         <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
-                        <td class="p-3 text-sm">${d.peakCcu.toLocaleString()}</td>
-                        <td class="p-3 text-sm">${formatChange(d.peakCcuChange)}</td>
                     `;
                     tableBody.appendChild(row);
                 });
             }
 
-            /**
-             * Updates the counter values.
-             * @param {Array<Object>} data - The data to use for counters.
-             */
             function updateCounters(data) {
-                if (!data || data.length === 0) {
-                    document.getElementById('ccu-counter').textContent = '0';
-                    document.getElementById('positive-counter').textContent = '0';
-                    document.getElementById('negative-counter').textContent = '0';
-                    document.getElementById('positive-ratio-counter').textContent = '0%';
-                    document.getElementById('peak-ccu-counter').textContent = '0';
-                    return;
+                const counters = { 'ccu-counter': '0', 'avg-ccu-counter': '0', 'positive-counter': '0', 'negative-counter': '0', 'positive-ratio-counter': '0%', 'peak-ccu-counter': '0' };
+                if (data && data.length > 0) {
+                    const latestData = data[data.length - 1];
+                    counters['ccu-counter'] = (latestData.ccu || 0).toLocaleString();
+                    counters['avg-ccu-counter'] = (latestData.avgCcu || 0).toLocaleString();
+                    counters['positive-counter'] = (latestData.cumulativePositive || 0).toLocaleString();
+                    counters['negative-counter'] = (latestData.cumulativeNegative || 0).toLocaleString();
+                    counters['positive-ratio-counter'] = `${(latestData.ratio || 0).toFixed(2)}%`;
+                    counters['peak-ccu-counter'] = data.reduce((max, current) => Math.max(max, current.ccu), 0).toLocaleString();
                 }
-
-                const latestData = data[data.length - 1];
-                document.getElementById('ccu-counter').textContent = latestData.ccu.toLocaleString();
-                document.getElementById('positive-counter').textContent = latestData.cumulativePositive.toLocaleString();
-                document.getElementById('negative-counter').textContent = latestData.cumulativeNegative.toLocaleString();
-                document.getElementById('positive-ratio-counter').textContent = `${latestData.ratio.toFixed(2)}%`;
-                
-                const peakCcuInView = data.reduce((max, current) => Math.max(max, current.ccu), 0);
-                document.getElementById('peak-ccu-counter').textContent = peakCcuInView.toLocaleString();
+                for (const id in counters) { document.getElementById(id).textContent = counters[id]; }
             }
 
-            /**
-             * Main function to update the chart and counters.
-             */
             function updateUI() {
-                const startDatePicker = document.getElementById('start-date-picker');
-                const endDatePicker = document.getElementById('end-date-picker');
-
-                let startDate = new Date(startDatePicker.value);
-                let endDate = new Date(endDatePicker.value);
-                
-                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                    return;
-                }
-                
+                const startDate = new Date(document.getElementById('start-date-picker').value);
+                const endDate = new Date(document.getElementById('end-date-picker').value);
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
                 startDate.setHours(0, 0, 0, 0);
                 endDate.setHours(23, 59, 59, 999);
-
                 const filteredData = filterDataByDateRange(fullDailyData, startDate, endDate);
                 currentProcessedData = interpolateData(filteredData, currentGranularity);
                 currentProcessedData = calculatePercentageChange(currentProcessedData);
-                
                 renderChart(currentProcessedData);
                 renderTable(currentProcessedData);
                 updateCounters(currentProcessedData);
             }
 
-            /**
-             * Updates the style of the active button.
-             * @param {Element} buttonContainer - The container element holding the buttons.
-             * @param {string} activeId - The ID of the button to make active.
-             */
-            function updateActiveButton(buttonContainer, activeId) {
-                const buttons = buttonContainer.querySelectorAll('button');
+            function updateActiveButton(buttons, activeIdentifier) {
                 buttons.forEach(btn => {
-                    if (btn.id === activeId || btn.dataset.days === activeId) {
-                        btn.classList.add('active-btn');
-                        btn.classList.remove('inactive-btn');
-                    } else {
-                        btn.classList.add('inactive-btn');
-                        btn.classList.remove('active-btn');
-                    }
+                    const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
+                    if (btnIdentifier === activeIdentifier) { btn.classList.add('active-btn'); btn.classList.remove('inactive-btn'); } 
+                    else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
                 });
             }
 
-            /**
-             * Calls the Gemini API to generate insights about the game statistics.
-             */
-            async function generateInsights() {
-                const insightsOutput = document.getElementById('insights-output');
-                const loadingSpinner = document.getElementById('loading-spinner');
-                const apiKeyInput = document.getElementById('api-key-input');
-                const apiKey = apiKeyInput.value;
-                const startDatePicker = document.getElementById('start-date-picker');
-                const endDatePicker = document.getElementById('end-date-picker');
-
-                insightsOutput.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden');
-
-                if (!apiKey) {
-                    insightsOutput.textContent = 'APIキーを入力してください。';
-                    insightsOutput.classList.remove('hidden');
-                    loadingSpinner.classList.add('hidden');
-                    return;
-                }
-                
-                localStorage.setItem('gemini-api-key', apiKey);
-
-                const startDate = new Date(startDatePicker.value);
-                const endDate = new Date(endDatePicker.value);
-                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                    insightsOutput.textContent = '有効な日付範囲を選択してください。';
-                    insightsOutput.classList.remove('hidden');
-                    loadingSpinner.classList.add('hidden');
-                    return;
-                }
-
-                const insightsData = filterDataByDateRange(fullDailyData, startDate, endDate);
-                if (insightsData.length === 0) {
-                    insightsOutput.textContent = '分析するデータがありません。期間を選択してください。';
-                    insightsOutput.classList.remove('hidden');
-                    loadingSpinner.classList.add('hidden');
-                    return;
-                }
-                
-                const dataString = insightsData.map(d => 
-                    `Date: ${new Date(d.timestamp).toLocaleDateString()}, CCU: ${d.ccu}, Cumulative Positive: ${d.cumulativePositive}, Cumulative Negative: ${d.cumulativeNegative}, Positive Ratio: ${d.ratio}%`
-                ).join('\n');
-
-                // Corrected typos and structured the prompt
-                const prompt = `
-**ゲーム概要:**
-Universe Sandbox 3は、2025年12月31日にリリースされた、価格0円のGiant Armyが開発・販売している宇宙シミュレーションゲームです。
-このゲームの最大の特徴は、宇宙空間の物理法則をリアルタイムでシミュレーションできることにあります。重力、衝突、気候、物質の相互作用などをリアルに再現しており、プレイヤーは宇宙を自由に創造したり、破壊したりすることができます。
-具体的には、以下のようなことができます。
-- **天体の創造と操作:** 惑星、恒星、ブラックホールなどを自由に配置し、その軌道や質量などを変更できます。
-- **壮大な衝突シミュレーション:** 惑星と惑星、恒星と恒星を衝突させ、その結果を観察できます。
-- **気候変動のシミュレーション:** 地球の傾きや太陽からの距離を変え、気候がどう変化するかをモデル化できます。
-- **架空の宇宙空間の作成:** 実際に存在しない独自の太陽系や銀河系を作り出すことができます。
-このように、『Universe Sandbox 3』は、宇宙の壮大なスケールと、物理法則の美しさ、そして天体の儚さを体験できる、シミュレーションと教育の要素を兼ね備えたゲームとなっています。
-
----
-
-**分析依頼:**
-以下のデータは、この架空のゲーム「Universe Sandbox 3」の${startDate.toLocaleDateString()}から${endDate.toLocaleDateString()}までの統計です。このゲームの背景情報を踏まえ、データに基づいてゲームのパフォーマンスについての簡潔な分析と、CCUトレンドを考慮したマーケティング戦略の提案を日本語でMarkdown形式で提供してください。
-
-**統計データ:**
-${dataString}
-
----
-
-**出力形式:**
-分析結果と提案は、以下のセクションに分けてください。
-### ゲームパフォーマンス分析
-### マーケティング戦略提案
-`;
-
-                try {
-                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                    const payload = { contents: chatHistory };
-                    // ★★★★★ ユーザーの要求に応じてモデル名を絶対に変更 ★★★★★
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error.message}`);
-                    }
-                    
-                    const result = await response.json();
-                    
-                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                        const text = result.candidates[0].content.parts[0].text;
-                        insightsOutput.innerHTML = marked.parse(text); 
-                    } else {
-                         throw new Error('APIからの応答が予期した形式ではありません。応答内容を確認してください。');
-                    }
-                    
-                } catch (error) {
-                    console.error('Failed to generate insights:', error);
-                    insightsOutput.textContent = `分析の生成に失敗しました: ${error.message}`;
-                } finally {
-                    loadingSpinner.classList.add('hidden');
-                    insightsOutput.classList.remove('hidden');
-                }
-            }
-
-            // Set up event listeners
-            const granularityButtons = document.querySelectorAll('[data-granularity]');
-            granularityButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    currentGranularity = button.dataset.granularity;
-                    updateActiveButton(document.querySelector('.flex.flex-wrap.gap-2.items-center'), `btn-${button.dataset.granularity}`);
+            function handleGranularityChange() {
+                const dailyRatingsBtn = document.querySelector('[data-chart="daily-ratings"]');
+                const isDailyOnly = currentGranularity !== '1d';
+                dailyRatingsBtn.disabled = isDailyOnly;
+                if (isDailyOnly) { dailyRatingsBtn.classList.add('disabled-btn'); } 
+                else { dailyRatingsBtn.classList.remove('disabled-btn'); }
+                if (isDailyOnly && activeChartType === 'daily-ratings') {
+                    document.querySelector('[data-chart="ccu"]').click();
+                } else {
                     updateUI();
-                });
-            });
+                }
+            }
+            
+            document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
+                if (button.disabled) return;
+                activeChartType = button.dataset.chart;
+                updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
+                renderChart(currentProcessedData);
+            }));
+            
+            document.querySelectorAll('.granularity-btn').forEach(button => button.addEventListener('click', () => {
+                currentGranularity = button.dataset.granularity;
+                updateActiveButton(document.querySelectorAll('.granularity-btn'), currentGranularity);
+                handleGranularityChange();
+            }));
 
-            const dateRangeButtonsContainer = document.getElementById('date-range-buttons');
+            const dateRangeContainer = document.getElementById('date-range-buttons');
+            const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
             const startDatePicker = document.getElementById('start-date-picker');
             const endDatePicker = document.getElementById('end-date-picker');
 
-            dateRangeButtonsContainer.addEventListener('click', (e) => {
+            dateRangeContainer.addEventListener('click', (e) => {
                 const button = e.target.closest('button');
                 if (!button) return;
-
                 const days = button.dataset.days;
-                let startDate, endDate;
-                
-                const isCustom = days === 'custom';
-                startDatePicker.disabled = !isCustom;
-                endDatePicker.disabled = !isCustom;
-
-                if (days === 'all') {
-                    startDate = new Date(datasetStartDate);
-                    endDate = new Date(datasetEndDate);
-                } else if (isCustom) {
-                    updateActiveButton(dateRangeButtonsContainer, button.dataset.days);
-                    return;
-                } else {
-                    const daysOffset = parseInt(days, 10);
-                    endDate = new Date(datasetEndDate);
-                    startDate = new Date(datasetEndDate);
-                    startDate.setDate(datasetEndDate.getDate() - (daysOffset -1));
-                }
-
-                startDatePicker.value = startDate.toISOString().split('T')[0];
-                endDatePicker.value = endDate.toISOString().split('T')[0];
-                
-                updateActiveButton(dateRangeButtonsContainer, button.dataset.days);
+                startDatePicker.disabled = days !== 'custom';
+                endDatePicker.disabled = days !== 'custom';
+                if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
+                let startDate, endDate = new Date(datasetEndDate);
+                if (days === 'all') { startDate = new Date(datasetStartDate); } 
+                else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
+                startDatePicker.valueAsDate = startDate;
+                endDatePicker.valueAsDate = endDate;
+                updateActiveButton(dateRangeButtons, days);
                 updateUI();
             });
 
-            startDatePicker.addEventListener('change', () => {
-                updateActiveButton(dateRangeButtonsContainer, 'custom');
-                updateUI();
-            });
-            endDatePicker.addEventListener('change', () => {
-                updateActiveButton(dateRangeButtonsContainer, 'custom');
-                updateUI();
-            });
-
-            document.getElementById('generate-insights-btn').addEventListener('click', generateInsights);
+            startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+            endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
             
-            document.getElementById('api-key-input').addEventListener('input', (event) => {
-                localStorage.setItem('gemini-api-key', event.target.value);
-            });
-
-            window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-                updateUI();
-            });
-
-            const markedScript = document.createElement('script');
-            markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-            document.head.appendChild(markedScript);
-            markedScript.onload = () => {
-                // Now marked is available
-            };
-
-            // Initialize the app
-            fullDailyData = generateDailyData(datasetStartDate, datasetEndDate);
+            const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
+            fullDailyData = calculateMovingAverage(dailyData);
             
-            const savedApiKey = localStorage.getItem('gemini-api-key');
-            if (savedApiKey) {
-                document.getElementById('api-key-input').value = savedApiKey;
-            }
+            document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
 
-            // Set date range info text
-            const infoEl = document.getElementById('date-range-info');
-            infoEl.textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
-
-            // On first load, select the "All Time" button
-            const allButton = document.querySelector('[data-days="all"]');
-            allButton.click();
+            document.querySelector('[data-days="all"]').click();
         });
     </script>
 </body>
