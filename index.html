@@ -46,11 +46,6 @@
             .light-mode-text-black {
                 color: #1a202c; /* A specific class for this color */
             }
-            /* Set ApexCharts theme to light */
-            .apexcharts-tooltip-dark {
-                background: #ffffff !important;
-                color: #1a202c !important; /* Tooltip text color matches dark mode background */
-            }
             .table-header {
                 background-color: #e2e8f0;
                 color: #1a202c;
@@ -63,14 +58,10 @@
                 color: #1a202c;
             }
         }
-        /* For dark theme, make tooltips light */
+        /* For dark theme */
         @media (prefers-color-scheme: dark) {
             body {
                 color: #f7fafc; /* Text color in dark mode matches light mode background */
-            }
-            .apexcharts-tooltip-light {
-                background: #1a202c !important; /* Tooltip background matches dark mode background */
-                color: #f7fafc !important; /* Tooltip text color matches light mode background */
             }
             .table-header {
                 background-color: #4a5568;
@@ -594,7 +585,10 @@
                 const periodPeakCcuSeries = data.map(d => [d.timestamp, d.peakCcu]);
 
                 const isLightMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-                const tooltipTheme = isLightMode ? 'dark' : 'light';
+                
+                // ★★★ 修正箇所 ★★★
+                // ダークモードの時は 'dark' テーマを、ライトモードの時は 'light' テーマをツールチップに適用します。
+                const tooltipTheme = isLightMode ? 'light' : 'dark';
 
                 const options = {
                     series: [
@@ -623,7 +617,6 @@
                         },
                         tooltip: { enabled: true }
                     },
-                    // ★★★ Y-AXIS CONFIGURATION REVISED FOR INDEPENDENT AXES ★★★
                     yaxis: [
                         { // Y-axis 1: CCU (Left)
                             seriesName: 'CCU',
@@ -716,7 +709,7 @@
                                 return `${formattedValue} ${changeText}`;
                             }
                         },
-                        theme: tooltipTheme,
+                        theme: tooltipTheme, // 修正したテーマを適用
                         shared: true,
                         intersect: false
                     },
@@ -938,7 +931,7 @@ ${dataString}
                 try {
                     const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                     const payload = { contents: chatHistory };
-                    // Changed the model name as requested
+                    // ★★★★★ ユーザーの要求に応じてモデル名を絶対に変更 ★★★★★
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
