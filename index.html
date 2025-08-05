@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universe Sandbox 3 - 統計</title>
+    <!-- Google Sans Font Load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Default is dark theme */
+        body {
+            font-family: 'Google Sans', sans-serif;
+            background-color: #1a202c; /* Dark mode background color */
+            color: #e2e8f0;
+            box-sizing: border-box; /* Ensures padding and borders are included in the width */
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            background-color: #2d3748; /* Dark mode card background color */
+        }
+        input[type="date"], input[type="password"] {
+            background-color: #4a5568;
+            border-color: #4a5568;
+        }
+        /* Light theme */
+        @media (prefers-color-scheme: light) {
+            body {
+                background-color: #f7fafc; /* Light mode background color */
+                color: #1a202c; /* Text color in light mode matches dark mode background */
+            }
+            .card {
+                background-color: #ffffff; /* Light mode card background color */
+            }
+            input[type="date"], input[type="password"] {
+                background-color: #edf2f7;
+                border-color: #e2e8f0;
+                color: #1a202c; /* Text color in light mode matches dark mode background */
+            }
+            .light-mode-text-black {
+                color: #1a202c; /* A specific class for this color */
+            }
+            /* Set ApexCharts theme to light */
+            .apexcharts-tooltip-dark {
+                background: #ffffff !important;
+                color: #1a202c !important; /* Tooltip text color matches dark mode background */
+            }
+            .table-header {
+                background-color: #e2e8f0;
+                color: #1a202c;
+            }
+            .table-row-odd {
+                background-color: #f7fafc;
+            }
+            /* Counter text color for light mode */
+            .counter-text {
+                color: #1a202c;
+            }
+        }
+        /* For dark theme, make tooltips light */
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #f7fafc; /* Text color in dark mode matches light mode background */
+            }
+            .apexcharts-tooltip-light {
+                background: #1a202c !important; /* Tooltip background matches dark mode background */
+                color: #f7fafc !important; /* Tooltip text color matches light mode background */
+            }
+            .table-header {
+                background-color: #4a5568;
+                color: #f7fafc;
+            }
+            .table-row-odd {
+                background-color: #2d3748;
+            }
+            /* Counter text color for dark mode */
+            .counter-text {
+                color: #ffffff;
+            }
+        }
+        
+        /* Adjust ApexCharts tooltip style */
+        .apexcharts-tooltip {
+            font-family: 'Google Sans', sans-serif !important;
+        }
+
+        .active-btn {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+        }
+
+        .inactive-btn {
+            background-color: #4a5568; /* bg-gray-600 */
+            color: white;
+        }
+        
+        .inactive-btn:hover {
+            background-color: #6b7280; /* hover:bg-gray-700 */
+        }
+
+        /* Table specific styles */
+        .data-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="container w-full mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                Universe Sandbox 3 - 統計
+            </h1>
+            <p class="text-gray-400 mt-2">PUBGをモデルにしたより現実的なデータ</p>
+        </header>
+
+        <!-- Counters section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                <p class="text-xl font-bold text-blue-300">CCU (同時接続ユーザー数)</p>
+                <p id="ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+            </div>
+            <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                <p class="text-xl font-bold text-green-300">合計高評価数</p>
+                <p id="positive-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+            </div>
+            <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                <p class="text-xl font-bold text-red-300">低評価数</p>
+                <p id="negative-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+            </div>
+            <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                <p class="text-xl font-bold text-indigo-300">ピークCCU</p>
+                <p id="peak-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+            </div>
+        </div>
+
+        <!-- Chart section -->
+        <div class="card p-6 rounded-xl shadow-lg">
+            <div class="flex flex-col space-y-4 mb-4">
+                <!-- Granularity buttons -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
+                    <button id="btn-30m" data-granularity="30m" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">30分</button>
+                    <button id="btn-1h" data-granularity="1h" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1時間</button>
+                    <button id="btn-1d" data-granularity="1d" class="px-4 py-2 active-btn font-bold rounded-lg transition-colors">1日</button>
+                </div>
+
+                <!-- Period buttons -->
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div id="date-range-buttons" class="flex flex-wrap gap-2">
+                        <button data-days="1" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1日</button>
+                        <button data-days="3" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">3日</button>
+                        <button data-days="7" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">7日</button>
+                        <button data-days="14" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">14日</button>
+                        <button data-days="28" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">28日</button>
+                        <button data-days="56" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">56日</button>
+                        <button data-days="90" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">90日</button>
+                        <button data-days="180" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">180日</button>
+                        <button data-days="360" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">360日</button>
+                        <button data-days="all" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">全期間</button>
+                        <button data-days="custom" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">カスタム</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <label for="start-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">開始日:</label>
+                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="end-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">終了日:</label>
+                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="chart-container" class="mt-4">
+                <div id="apex-chart"></div>
+            </div>
+        </div>
+        
+        <!-- Data Table Section -->
+        <div class="card p-6 rounded-xl shadow-lg mt-8">
+            <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
+                データ詳細
+            </h2>
+            <div class="data-table-container rounded-lg border border-gray-600">
+                <table class="w-full text-left table-auto">
+                    <thead class="sticky top-0 z-10">
+                        <tr class="table-header">
+                            <th class="p-3 font-semibold text-sm rounded-tl-lg">日付</th>
+                            <th class="p-3 font-semibold text-sm">CCU</th>
+                            <th class="p-3 font-semibold text-sm">CCU (%)</th>
+                            <th class="p-3 font-semibold text-sm">合計高評価数</th>
+                            <th class="p-3 font-semibold text-sm">高評価数 (%)</th>
+                            <th class="p-3 font-semibold text-sm">低評価数</th>
+                            <th class="p-3 font-semibold text-sm">低評価数 (%)</th>
+                            <th class="p-3 font-semibold text-sm">高評価率</th>
+                            <th class="p-3 font-semibold text-sm">高評価率 (%)</th>
+                            <th class="p-3 font-semibold text-sm rounded-tr-lg">ピークCCU</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Data rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gemini Insights Section -->
+        <div class="card p-6 rounded-xl shadow-lg mt-8">
+            <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-500 mb-4">
+                Gemini Insights
+            </h2>
+            <!-- API Key Input -->
+            <div class="mb-4">
+                <label for="api-key-input" class="block text-gray-300 light-mode-text-black mb-2">Gemini APIキー:</label>
+                <input type="password" id="api-key-input" placeholder="ここにAPIキーを入力してください" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white">
+            </div>
+            <button id="generate-insights-btn" class="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold rounded-xl shadow-lg hover:from-green-600 hover:to-teal-700 transform transition-transform duration-300 hover:scale-105">
+                <span class="mr-2">✨</span> 統計分析とマーケティング戦略を生成
+            </button>
+            <div id="insights-output" class="mt-4 p-4 bg-gray-700 rounded-lg whitespace-pre-wrap text-sm text-gray-200 hidden">
+                <!-- Insights will be displayed here -->
+            </div>
+            <div id="loading-spinner" class="mt-4 hidden">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-75"></div>
+                    <div class="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-150"></div>
+                    <span class="text-gray-400">分析を生成中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ApexCharts JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+        // Define app ID for Firestore usage
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // JavaScript code to generate data and draw the chart
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Array to store all data points
+            let fullDailyData = [];
+            // Current chart object
+            let chart;
+            // Current granularity of the timestamps
+            let currentGranularity = '1d';
+            // Latest filtered and interpolated data
+            let currentProcessedData = [];
+
+
+            // Define the start and end dates of the dataset
+            const datasetStartDate = new Date('2025-12-31T00:00:00Z');
+            const datasetEndDate = new Date('2030-01-01T00:00:00Z');
+
+            /**
+             * Generates realistic data modeled after PUBG's growth curve and updates.
+             * @param {Date} startDate - Start date of the data.
+             * @param {Date} endDate - End date of the data.
+             * @returns {Array<Object>} - An array of generated data.
+             */
+            function generateDailyData(startDate, endDate) {
+                const data = [];
+                let currentTime = new Date(startDate);
+                
+                let cumulativePositive = 0;
+                let cumulativeNegative = 0;
+                let overallPeakCcu = 0;
+
+                // User-specified CCU data points
+                const ccuPoints = [
+                    { date: new Date('2026-01-01'), ccu: 10000 },
+                    { date: new Date('2027-01-01'), ccu: 35000000 },
+                    { date: new Date('2028-01-01'), ccu: 30000000 },
+                    { date: new Date('2029-01-01'), ccu: 22500000 },
+                    { date: new Date('2030-01-01'), ccu: 19250000 }
+                ];
+                
+                // Determine CCU fluctuations for the entire period
+                const ccuTimeline = {};
+                for (let i = 0; i < ccuPoints.length - 1; i++) {
+                    const startPoint = ccuPoints[i];
+                    const endPoint = ccuPoints[i + 1];
+
+                    let currentDate = new Date(startPoint.date);
+                    const totalDays = (endPoint.date.getTime() - startPoint.date.getTime()) / (1000 * 60 * 60 * 24);
+
+                    let dayCount = 0;
+                    while (currentDate < endPoint.date) {
+                        const progress = dayCount / totalDays;
+                        let baseCcu;
+                        
+                        // Apply different growth/decline models for each period
+                        const startYear = startPoint.date.getFullYear();
+                        if (startYear === 2026) {
+                            // 2026-2027: Rapid growth (exponential curve)
+                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * (1 - Math.exp(-progress * 5));
+                        } else if (startYear === 2027) {
+                            // 2027-2028: Gradual decline (S-curve)
+                            baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
+                        } else if (startYear === 2028) {
+                            // 2028-2029: Gentle decline
+                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
+                        } else if (startYear === 2029) {
+                            // 2029-2030: Stabilization
+                            baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
+                        }
+
+                        // Add random noise
+                        const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
+                        ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
+                        
+                        currentDate.setDate(currentDate.getDate() + 1);
+                        dayCount++;
+                    }
+                }
+
+                while (currentTime <= endDate) {
+                    const dateString = currentTime.toISOString().slice(0, 10);
+                    const baseCcu = ccuTimeline[dateString] || 10000;
+                    
+                    // Simulate monthly updates
+                    const isUpdateDay = currentTime.getDate() === 1 && currentTime.getMonth() !== startDate.getMonth();
+
+                    // Boost ratings on update days
+                    let positiveRatingsBoost = 0;
+                    let negativeRatingsBoost = 0;
+                    if (isUpdateDay) {
+                        positiveRatingsBoost = 200000;
+                        negativeRatingsBoost = 15000;
+                    }
+
+                    // Create CCU data point
+                    const ccuPoint = createCcuDataPoint(currentTime, baseCcu, isUpdateDay);
+                    
+                    // Update overall peak CCU
+                    if (ccuPoint.ccu > overallPeakCcu) {
+                        overallPeakCcu = ccuPoint.ccu;
+                    }
+
+                    // Create rating data point (linked to CCU)
+                    const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu, positiveRatingsBoost, negativeRatingsBoost);
+                    
+                    cumulativePositive += ratingPoint.positive;
+                    cumulativeNegative += ratingPoint.negative;
+
+                    data.push({
+                        ...ccuPoint,
+                        ...ratingPoint,
+                        cumulativePositive: cumulativePositive,
+                        cumulativeNegative: cumulativeNegative,
+                        peakCcu: overallPeakCcu
+                    });
+
+                    currentTime.setDate(currentTime.getDate() + 1);
+                }
+                return data;
+            }
+
+            /**
+             * Helper function to create a CCU data point.
+             * @param {Date} date - The timestamp.
+             * @param {number} ccu - The concurrent user count.
+             * @param {boolean} isUpdateDay - Whether it's an update day.
+             * @returns {Object} - The CCU data.
+             */
+            function createCcuDataPoint(date, ccu, isUpdateDay) {
+                let actualCcu = ccu;
+
+                // On update days, simulate a sharp increase
+                if (isUpdateDay) {
+                    const updatePeak = ccu * 2; // Double on update
+                    actualCcu = updatePeak;
+                }
+
+                return {
+                    timestamp: date.getTime(),
+                    ccu: Math.floor(actualCcu),
+                };
+            }
+
+            /**
+             * Helper function to create a rating data point.
+             * @param {Date} date - The timestamp.
+             * @param {number} ccu - The CCU for the day.
+             * @param {number} positiveRatingsBoost - Boost in positive ratings for updates.
+             * @param {number} negativeRatingsBoost - Boost in negative ratings for updates.
+             * @returns {Object} - The ratings data.
+             */
+            function createRatingDataPoint(date, ccu, positiveRatingsBoost, negativeRatingsBoost) {
+                // Calculate daily positive and negative ratings based on CCU
+                const dailyPositiveBase = ccu * (0.001 + Math.random() * 0.001); // 0.1% to 0.2%
+                const dailyNegativeBase = ccu * (0.0001 + Math.random() * 0.0001); // 0.01% to 0.02%
+                
+                const positiveRatings = Math.floor(dailyPositiveBase) + positiveRatingsBoost;
+                const negativeRatings = Math.floor(dailyNegativeBase) + negativeRatingsBoost;
+                
+                const totalRatings = positiveRatings + negativeRatings;
+                const positiveRatingPercentage = totalRatings > 0 ? (positiveRatings / totalRatings) * 100 : 0;
+
+                return {
+                    positive: positiveRatings,
+                    negative: negativeRatings,
+                    ratio: parseFloat(positiveRatingPercentage.toFixed(2))
+                };
+            }
+
+            /**
+             * Filters data based on the selected date range.
+             * @param {Array<Object>} allData - All data.
+             * @param {Date} startDate - Start date.
+             * @param {Date} endDate - End date.
+             * @returns {Array<Object>} - The filtered data.
+             */
+            function filterDataByDateRange(allData, startDate, endDate) {
+                const startTimestamp = startDate.getTime();
+                const endTimestamp = endDate.getTime();
+                return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+            }
+
+            /**
+             * Interpolates data based on granularity (with diurnal cycles).
+             * @param {Array<Object>} dailyData - Data in daily intervals.
+             * @param {string} granularity - '30m', '1h', or '1d'.
+             * @returns {Array<Object>} - The interpolated data.
+             */
+            function interpolateData(dailyData, granularity) {
+                if (granularity === '1d' || dailyData.length <= 1) {
+                    return dailyData;
+                }
+
+                const interpolated = [];
+                const interval = granularity === '30m' ? 30 * 60 * 1000 : 60 * 60 * 1000;
+                const dailyCycle = 24 * 60 * 60 * 1000;
+                let currentPeak = 0;
+
+                for (let i = 0; i < dailyData.length - 1; i++) {
+                    const d1 = dailyData[i];
+                    const d2 = dailyData[i + 1];
+                    
+                    // Update current peak before pushing the data point
+                    if (d1.ccu > currentPeak) {
+                        currentPeak = d1.ccu;
+                    }
+
+                    // Add the start point
+                    interpolated.push({ ...d1, peakCcu: currentPeak });
+
+                    let currentTimestamp = d1.timestamp + interval;
+                    while (currentTimestamp < d2.timestamp) {
+                        const dayProgress = ((currentTimestamp - d1.timestamp) % dailyCycle) / dailyCycle;
+                        
+                        // Simulate diurnal CCU fluctuations (decrease at night, increase during the day)
+                        const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
+                        
+                        // Linear interpolation
+                        const ratio = (currentTimestamp - d1.timestamp) / (d2.timestamp - d1.timestamp);
+                        const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
+                        
+                        // Add random noise
+                        const randomNoise = (Math.random() - 0.5) * 0.1;
+                        
+                        const ccuValue = Math.floor(linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise);
+                        
+                        // Update current peak with the new interpolated point
+                        if (ccuValue > currentPeak) {
+                            currentPeak = ccuValue;
+                        }
+
+                        const newPoint = {
+                            timestamp: currentTimestamp,
+                            ccu: ccuValue,
+                            positive: Math.floor(d1.positive + (d2.positive - d1.positive) * ratio),
+                            negative: Math.floor(d1.negative + (d2.negative - d1.negative) * ratio),
+                            ratio: parseFloat((d1.ratio + (d2.ratio - d1.ratio) * ratio + randomNoise * 5).toFixed(2)),
+                            cumulativePositive: Math.floor(d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio),
+                            cumulativeNegative: Math.floor(d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio),
+                            peakCcu: currentPeak
+                        };
+                        interpolated.push(newPoint);
+                        currentTimestamp += interval;
+                    }
+                }
+                // Add the final point
+                if (dailyData[dailyData.length - 1].ccu > currentPeak) {
+                    currentPeak = dailyData[dailyData.length - 1].ccu;
+                }
+                interpolated.push({ ...dailyData[dailyData.length - 1], peakCcu: currentPeak });
+                
+                return interpolated;
+            }
+
+            /**
+             * Calculates the percentage change between consecutive data points for each metric.
+             * @param {Array<Object>} data - The data to calculate changes for.
+             * @returns {Array<Object>} - The data with added percentage change properties.
+             */
+            function calculatePercentageChange(data) {
+                if (data.length <= 1) {
+                    return data;
+                }
+                
+                return data.map((d, index) => {
+                    if (index === 0) {
+                        return { 
+                            ...d, 
+                            ccuChange: null, 
+                            positiveChange: null, 
+                            negativeChange: null, 
+                            ratioChange: null 
+                        };
+                    }
+                    
+                    const prevD = data[index - 1];
+                    const ccuChange = prevD.ccu === 0 ? 0 : ((d.ccu - prevD.ccu) / prevD.ccu) * 100;
+                    const positiveChange = prevD.cumulativePositive === 0 ? 0 : ((d.cumulativePositive - prevD.cumulativePositive) / prevD.cumulativePositive) * 100;
+                    const negativeChange = prevD.cumulativeNegative === 0 ? 0 : ((d.cumulativeNegative - prevD.cumulativeNegative) / prevD.cumulativeNegative) * 100;
+                    const ratioChange = prevD.ratio === 0 ? 0 : ((d.ratio - prevD.ratio) / prevD.ratio) * 100;
+
+                    return {
+                        ...d,
+                        ccuChange: ccuChange,
+                        positiveChange: positiveChange,
+                        negativeChange: negativeChange,
+                        ratioChange: ratioChange
+                    };
+                });
+            }
+
+
+            /**
+             * Renders or updates the chart.
+             * @param {Array<Object>} data - The data to plot.
+             */
+            function renderChart(data) {
+                if (!data || data.length === 0) return;
+
+                const ccuSeries = data.map(d => [d.timestamp, d.ccu]);
+                const positiveSeries = data.map(d => [d.timestamp, d.cumulativePositive]);
+                const negativeSeries = data.map(d => [d.timestamp, d.cumulativeNegative]);
+                // Keep the ratio series in the chart
+                const ratioSeries = data.map(d => [d.timestamp, d.ratio]);
+                const peakCcuSeries = data.map(d => [d.timestamp, d.peakCcu]);
+
+                // Set chart theme based on device theme
+                const isLightMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                const tooltipTheme = isLightMode ? 'dark' : 'light';
+
+                const options = {
+                    series: [
+                        { name: 'CCU', data: ccuSeries },
+                        { name: '合計高評価数', data: positiveSeries },
+                        { name: '合計低評価数', data: negativeSeries },
+                        { name: '高評価率', data: ratioSeries },
+                        { name: 'ピークCCU', data: peakCcuSeries }
+                    ],
+                    chart: {
+                        id: 'universe-sandbox-chart',
+                        type: 'line',
+                        height: 400,
+                        toolbar: { show: true, autoSelected: 'zoom' },
+                        background: isLightMode ? '#ffffff' : '#2d3748',
+                        foreColor: isLightMode ? '#1a202c' : '#f7fafc',
+                        fontFamily: 'Google Sans, sans-serif'
+                    },
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: currentGranularity === '1d' ? 'yyyy/MM/dd' : 'HH:mm'
+                        },
+                        tooltip: { enabled: false }
+                    },
+                    yaxis: [
+                        { // Y-axis for CCU and Peak CCU
+                            seriesName: 'CCU',
+                            axisTicks: { show: true },
+                            axisBorder: { show: true, color: '#008FFB' },
+                            labels: {
+                                style: { colors: '#008FFB' },
+                                formatter: val => Math.round(val).toLocaleString()
+                            },
+                            title: { text: 'CCU', style: { color: '#008FFB' } },
+                            tooltip: { enabled: true }
+                        },
+                        { // Y-axis for Cumulative Positive Ratings
+                            seriesName: '合計高評価数',
+                            axisTicks: { show: true },
+                            axisBorder: { show: true, color: '#00E396' },
+                            labels: {
+                                style: { colors: '#00E396' },
+                                formatter: val => Math.round(val).toLocaleString()
+                            },
+                            title: { text: '合計評価数', style: { color: '#00E396' } },
+                            opposite: true
+                        },
+                        { // Y-axis for Cumulative Negative Ratings
+                            seriesName: '合計低評価数',
+                            axisTicks: { show: true },
+                            axisBorder: { show: true, color: '#FF4560' },
+                            labels: {
+                                style: { colors: '#FF4560' },
+                                formatter: val => Math.round(val).toLocaleString()
+                            },
+                            title: { text: '合計低評価数', style: { color: '#FF4560' } },
+                            opposite: true
+                        },
+                        { // Y-axis for Ratio
+                            seriesName: '高評価率',
+                            axisTicks: { show: true },
+                            axisBorder: { show: true, color: '#FFC0CB' },
+                            min: 0, // Set minimum to 0
+                            max: 100, // Set maximum to 100
+                            labels: {
+                                formatter: val => `${val.toFixed(2)}%`,
+                                style: { colors: '#FFC0CB' }
+                            },
+                            title: { text: '高評価率', style: { color: '#FFC0CB' } },
+                            opposite: true
+                        },
+                        { // Y-axis for Peak CCU (not displayed, but needed for the line)
+                            seriesName: 'ピークCCU',
+                            axisTicks: { show: false },
+                            axisBorder: { show: false },
+                            labels: { show: false },
+                        }
+                    ],
+                    tooltip: {
+                        x: { format: currentGranularity === '1d' ? 'yyyy/MM/dd' : 'HH:mm' },
+                        y: {
+                            formatter: (val, opts) => {
+                                // Find the corresponding data point to get percentage change
+                                const dataIndex = opts.dataPointIndex;
+                                const seriesIndex = opts.seriesIndex;
+                                const dataPoint = data[dataIndex];
+                                
+                                let formattedValue = Math.round(val).toLocaleString();
+                                let changeText = '';
+                                
+                                if (seriesIndex === 0) { // CCU
+                                    if (dataPoint.ccuChange !== null) {
+                                        const change = dataPoint.ccuChange;
+                                        const arrow = change > 0 ? '▲' : '▼';
+                                        const color = change > 0 ? 'text-green-400' : 'text-red-400';
+                                        changeText = `<span class="${color}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                                    }
+                                } else if (seriesIndex === 1) { // Positive
+                                    if (dataPoint.positiveChange !== null) {
+                                        const change = dataPoint.positiveChange;
+                                        const arrow = change > 0 ? '▲' : '▼';
+                                        const color = change > 0 ? 'text-green-400' : 'text-red-400';
+                                        changeText = `<span class="${color}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                                    }
+                                } else if (seriesIndex === 2) { // Negative
+                                    if (dataPoint.negativeChange !== null) {
+                                        const change = dataPoint.negativeChange;
+                                        const arrow = change > 0 ? '▲' : '▼';
+                                        const color = change > 0 ? 'text-green-400' : 'text-red-400';
+                                        changeText = `<span class="${color}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                                    }
+                                } else if (seriesIndex === 3) { // Ratio
+                                     if (dataPoint.ratioChange !== null) {
+                                        const change = dataPoint.ratioChange;
+                                        const arrow = change > 0 ? '▲' : '▼';
+                                        const color = change > 0 ? 'text-green-400' : 'text-red-400';
+                                        changeText = `<span class="${color}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                                    }
+                                    formattedValue = `${val.toFixed(2)}%`;
+                                }
+                                
+                                // Combine value and change in the tooltip
+                                return `${formattedValue} ${changeText}`;
+                            }
+                        },
+                        theme: tooltipTheme
+                    },
+                    dataLabels: { enabled: false },
+                    legend: { position: 'top', horizontalAlign: 'left', floating: true },
+                    grid: { borderColor: isLightMode ? '#e2e8f0' : '#4a5568' }
+                };
+
+                // Update chart if it exists, otherwise create a new one
+                if (chart) {
+                    chart.updateOptions(options);
+                    chart.updateSeries([
+                        { name: 'CCU', data: ccuSeries },
+                        { name: '合計高評価数', data: positiveSeries },
+                        { name: '合計低評価数', data: negativeSeries },
+                        { name: '高評価率', data: ratioSeries },
+                        { name: 'ピークCCU', data: peakCcuSeries }
+                    ]);
+                } else {
+                    options.series = [
+                        { name: 'CCU', data: ccuSeries },
+                        { name: '合計高評価数', data: positiveSeries },
+                        { name: '合計低評価数', data: negativeSeries },
+                        { name: '高評価率', data: ratioSeries },
+                        { name: 'ピークCCU', data: peakCcuSeries }
+                    ];
+                    chart = new ApexCharts(document.querySelector("#apex-chart"), options);
+                    chart.render();
+                }
+            }
+
+            /**
+             * Renders the data in a table.
+             * @param {Array<Object>} data - The data to display in the table.
+             */
+            function renderTable(data) {
+                const tableBody = document.getElementById('data-table-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                if (!data || data.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="10" class="p-3 text-center text-gray-500">表示するデータがありません。</td>`;
+                    tableBody.appendChild(row);
+                    return;
+                }
+
+                // Reverse the data to show the latest dates first
+                const reversedData = [...data].reverse();
+
+                reversedData.forEach((d, index) => {
+                    const row = document.createElement('tr');
+                    row.classList.add('transition-colors', 'duration-200');
+                    if (index % 2 === 1) {
+                        row.classList.add('table-row-odd');
+                    } else {
+                        row.classList.add('hover:bg-gray-700', 'light:hover:bg-gray-100');
+                    }
+                    
+                    const date = new Date(d.timestamp);
+                    let dateString;
+                    if (currentGranularity === '1d') {
+                        dateString = date.toLocaleDateString();
+                    } else {
+                        dateString = date.toLocaleString();
+                    }
+
+                    // Helper function to format change percentage
+                    const formatChange = (change) => {
+                        if (change === null) return '-';
+                        const colorClass = change > 0 ? 'text-green-400' : 'text-red-400';
+                        const arrow = change > 0 ? '▲' : '▼';
+                        return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                    };
+
+                    row.innerHTML = `
+                        <td class="p-3 text-sm">${dateString}</td>
+                        <td class="p-3 text-sm">${d.ccu.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
+                        <td class="p-3 text-sm">${d.cumulativePositive.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.positiveChange)}</td>
+                        <td class="p-3 text-sm">${d.cumulativeNegative.toLocaleString()}</td>
+                        <td class="p-3 text-sm">${formatChange(d.negativeChange)}</td>
+                        <td class="p-3 text-sm">${d.ratio.toFixed(2)}%</td>
+                        <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
+                        <td class="p-3 text-sm">${d.peakCcu.toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            /**
+             * Updates the counter values.
+             * @param {Array<Object>} data - The data to use for counters.
+             */
+            function updateCounters(data) {
+                if (!data || data.length === 0) {
+                    document.getElementById('ccu-counter').textContent = '0';
+                    document.getElementById('positive-counter').textContent = '0';
+                    document.getElementById('negative-counter').textContent = '0';
+                    document.getElementById('peak-ccu-counter').textContent = '0';
+                    return;
+                }
+
+                const latestData = data[data.length - 1];
+                document.getElementById('ccu-counter').textContent = latestData.ccu.toLocaleString();
+                document.getElementById('positive-counter').textContent = latestData.cumulativePositive.toLocaleString();
+                document.getElementById('negative-counter').textContent = latestData.cumulativeNegative.toLocaleString();
+                
+                // Calculate and update peak CCU for the current view period
+                const peakCcuInView = data.reduce((max, current) => Math.max(max, current.ccu), 0);
+                document.getElementById('peak-ccu-counter').textContent = peakCcuInView.toLocaleString();
+            }
+
+            /**
+             * Main function to update the chart and counters.
+             */
+            function updateUI() {
+                const startDatePicker = document.getElementById('start-date-picker');
+                const endDatePicker = document.getElementById('end-date-picker');
+
+                let startDate = new Date(startDatePicker.value);
+                let endDate = new Date(endDatePicker.value);
+                
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    return;
+                }
+                
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(23, 59, 59, 999);
+
+                const filteredData = filterDataByDateRange(fullDailyData, startDate, endDate);
+                currentProcessedData = interpolateData(filteredData, currentGranularity);
+                currentProcessedData = calculatePercentageChange(currentProcessedData); // Calculate changes
+                
+                renderChart(currentProcessedData);
+                renderTable(currentProcessedData);
+                updateCounters(currentProcessedData);
+            }
+
+            /**
+             * Updates the style of the active button.
+             * @param {Element} buttonContainer - The container element holding the buttons.
+             * @param {string} activeId - The ID of the button to make active.
+             */
+            function updateActiveButton(buttonContainer, activeId) {
+                const buttons = buttonContainer.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    if (btn.id === activeId || btn.dataset.days === activeId) {
+                        btn.classList.add('active-btn');
+                        btn.classList.remove('inactive-btn');
+                    } else {
+                        btn.classList.add('inactive-btn');
+                        btn.classList.remove('active-btn');
+                    }
+                });
+            }
+
+            /**
+             * Calls the Gemini API to generate insights about the game statistics.
+             */
+            async function generateInsights() {
+                const insightsOutput = document.getElementById('insights-output');
+                const loadingSpinner = document.getElementById('loading-spinner');
+                const apiKeyInput = document.getElementById('api-key-input');
+                const apiKey = apiKeyInput.value;
+                const startDatePicker = document.getElementById('start-date-picker');
+                const endDatePicker = document.getElementById('end-date-picker');
+
+                insightsOutput.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+
+                if (!apiKey) {
+                    insightsOutput.textContent = 'APIキーを入力してください。';
+                    insightsOutput.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    return;
+                }
+                
+                // Save API key to localStorage
+                localStorage.setItem('gemini-api-key', apiKey);
+
+                const startDate = new Date(startDatePicker.value);
+                const endDate = new Date(endDatePicker.value);
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    insightsOutput.textContent = '有効な日付範囲を選択してください。';
+                    insightsOutput.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    return;
+                }
+
+                const insightsData = filterDataByDateRange(fullDailyData, startDate, endDate);
+                if (insightsData.length === 0) {
+                    insightsOutput.textContent = '分析するデータがありません。期間を選択してください。';
+                    insightsOutput.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    return;
+                }
+                
+                const dataString = insightsData.map(d => 
+                    `Date: ${new Date(d.timestamp).toLocaleDateString()}, CCU: ${d.ccu}, Cumulative Positive: ${d.cumulativePositive}, Cumulative Negative: ${d.cumulativeNegative}, Positive Ratio: ${d.ratio}%`
+                ).join('\n');
+
+                const prompt = `以下のデータは、架空のゲーム「Universe Sandbox 3」の${startDate.toLocaleDateString()}から${endDate.toLocaleDateString()}までの統計です。このデータに基づいて、ゲームのパフォーマンスについての簡潔な分析と、ゲームのCCUトレンドを考慮したマーケティング戦略の提案を日本語でMarkdown形式で提供してください。
+---
+${dataString}
+---
+分析結果と提案は、以下のセクションに分けてください。
+### ゲームパフォーマンス分析
+### マーケティング戦略提案`;
+
+                // Gemini API call
+                try {
+                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { contents: chatHistory };
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        // Use Marked.js to parse and display markdown
+                        insightsOutput.innerHTML = marked.parse(text); 
+                    } else {
+                        throw new Error('API response was not in the expected format.');
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to generate insights:', error);
+                    insightsOutput.textContent = `分析の生成に失敗しました: ${error.message}`;
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                    insightsOutput.classList.remove('hidden');
+                }
+            }
+
+            // Set up event listeners
+            const granularityButtons = document.querySelectorAll('[data-granularity]');
+            granularityButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    currentGranularity = button.dataset.granularity;
+                    updateActiveButton(document, `btn-${button.dataset.granularity}`);
+                    updateUI();
+                });
+            });
+
+            const dateRangeButtonsContainer = document.getElementById('date-range-buttons');
+            const startDatePicker = document.getElementById('start-date-picker');
+            const endDatePicker = document.getElementById('end-date-picker');
+
+            dateRangeButtonsContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const days = button.dataset.days;
+                let startDate, endDate;
+                
+                // Toggle date picker enabled/disabled state
+                const isCustom = days === 'custom';
+                startDatePicker.disabled = !isCustom;
+                endDatePicker.disabled = !isCustom;
+
+                if (days === 'all') {
+                    // All time
+                    startDate = new Date(datasetStartDate);
+                    endDate = new Date(datasetEndDate);
+                } else if (isCustom) {
+                    // Custom, do nothing here and use date picker values
+                    updateActiveButton(dateRangeButtonsContainer, button.dataset.days);
+                    return;
+                } else {
+                    // Specific number of days
+                    const daysOffset = parseInt(days, 10);
+                    endDate = new Date(datasetEndDate);
+                    startDate = new Date(datasetEndDate);
+                    startDate.setDate(datasetEndDate.getDate() - daysOffset);
+                }
+
+                // Update date picker values
+                startDatePicker.value = startDate.toISOString().split('T')[0];
+                endDatePicker.value = endDate.toISOString().split('T')[0];
+                
+                updateActiveButton(dateRangeButtonsContainer, button.dataset.days);
+                updateUI();
+            });
+
+            // Watch for changes in date pickers
+            startDatePicker.addEventListener('change', () => {
+                updateActiveButton(dateRangeButtonsContainer, 'custom');
+                updateUI();
+            });
+            endDatePicker.addEventListener('change', () => {
+                updateActiveButton(dateRangeButtonsContainer, 'custom');
+                updateUI();
+            });
+
+            // Gemini Insights button event listener
+            document.getElementById('generate-insights-btn').addEventListener('click', generateInsights);
+            
+            // API Key Input listener to save to localStorage on change
+            document.getElementById('api-key-input').addEventListener('input', (event) => {
+                localStorage.setItem('gemini-api-key', event.target.value);
+            });
+
+            // Update chart when theme changes
+            window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+                updateUI();
+            });
+
+            // Load Markdown parser
+            // Use Marked.js
+            const markedScript = document.createElement('script');
+            markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+            document.head.appendChild(markedScript);
+
+            // Initialize the app
+            fullDailyData = generateDailyData(datasetStartDate, datasetEndDate);
+            
+            // Load API key from localStorage on initialization
+            const savedApiKey = localStorage.getItem('gemini-api-key');
+            if (savedApiKey) {
+                document.getElementById('api-key-input').value = savedApiKey;
+            }
+
+            // On first load, select the "All Time" button
+            const allButton = document.querySelector('[data-days="all"]');
+            allButton.click();
+        });
+    </script>
+</body>
+</html>
