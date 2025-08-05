@@ -415,9 +415,14 @@
 
             function renderChart(data) {
                 const chartContainer = document.querySelector("#apex-chart");
-                if (chart) { chart.destroy(); chart = null; }
-                chartContainer.innerHTML = "";
-                if (!data || data.length === 0) return;
+                
+                if (!data || data.length === 0) {
+                    if (chart) {
+                        chart.updateSeries([]);
+                    }
+                    chartContainer.innerHTML = "";
+                    return;
+                }
                 
                 const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
                 const tooltipTheme = isLightMode ? 'light' : 'dark';
@@ -453,8 +458,12 @@
                     plotOptions: { bar: { columnWidth: '70%', dataLabels: { position: 'top' }, stacked: true } },
                 };
                 
-                chart = new ApexCharts(chartContainer, options);
-                chart.render();
+                if (chart) {
+                    chart.updateOptions(options);
+                } else {
+                    chart = new ApexCharts(chartContainer, options);
+                    chart.render();
+                }
             }
 
             function renderTable(data) {
@@ -550,7 +559,8 @@
                 if (button.disabled) return;
                 activeChartType = button.dataset.chart;
                 updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
-                renderChart(currentProcessedData);
+                // 直接renderChartを呼ぶのではなく、UI更新フローに統一
+                updateUI();
             }));
             
             document.querySelectorAll('.granularity-btn').forEach(button => button.addEventListener('click', () => {
