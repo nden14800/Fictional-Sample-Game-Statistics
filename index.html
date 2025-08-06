@@ -432,13 +432,22 @@
 
                 let series, yaxis, colors, title, stroke, chartType;
 
+                // Y軸の値を省略形にするためのフォーマッター関数
+                const yAxisFormatter = function(val) {
+                    if (val >= 1000000000000) return (val / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
+                    if (val >= 1000000000) return (val / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+                    if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                    if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                    return val !== null && val !== undefined ? Math.round(val) : '0';
+                };
+
                 switch(activeChartType) {
                     case 'ccu':
-                        chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() } }; break;
+                        chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
                     case 'daily-ratings':
-                        chartType = 'bar'; series = [ { name: '日次高評価数', data: data.map(d => [d.timestamp, d.positive]) }, { name: '日次低評価数', data: data.map(d => [d.timestamp, d.negative]) } ]; colors = ['#34D399', '#F87171']; title = '日次評価数'; stroke = { show: true, width: 2, colors: ['transparent'] }; yaxis = { title: { text: '評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() } }; break;
+                        chartType = 'bar'; series = [ { name: '日次高評価数', data: data.map(d => [d.timestamp, d.positive]) }, { name: '日次低評価数', data: data.map(d => [d.timestamp, d.negative]) } ]; colors = ['#34D399', '#F87171']; title = '日次評価数'; stroke = { show: true, width: 2, colors: ['transparent'] }; yaxis = { title: { text: '評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
                     case 'cumulative-ratings':
-                        chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => Math.round(val).toLocaleString() }, stacked: false }; break;
+                        chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter }, stacked: false }; break;
                     case 'ratio':
                         chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 };
                         yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
