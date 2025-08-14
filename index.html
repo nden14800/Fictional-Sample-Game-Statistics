@@ -269,6 +269,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         let fullDailyData = [];
+        let fullInterpolatedData30m = []; // 全期間の30分粒度データをキャッシュ
         let chart;
         let currentGranularity = '1d';
         let activeChartType = 'ccu';
@@ -283,7 +284,6 @@
             let cumulativePositive = 0;
             let cumulativeNegative = 0;
             
-            // ピークCCUが約95M~100MになるようにベースCCUを調整
             const ccuPoints = [
                 { date: new Date('2026-01-01'), ccu: 10000 },
                 { date: new Date('2027-01-01'), ccu: 8500000 },
@@ -317,11 +317,8 @@
                 const dateString = currentTime.toISOString().slice(0, 10);
                 let baseCcu = ccuTimeline[dateString] || 10000;
                 if (currentTime.getDay() === 0 || currentTime.getDay() === 6) baseCcu *= 1.4;
-                const isUpdateDay = currentTime.getDate() === 1;
-                let positiveRatingsBoost = 0, negativeRatingsBoost = 0;
-                if (isUpdateDay) { positiveRatingsBoost = 200000; negativeRatingsBoost = 15000; }
-                const ccuPoint = createCcuDataPoint(currentTime, baseCcu, isUpdateDay);
-                const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu, positiveRatingsBoost, negativeRatingsBoost);
+                const ccuPoint = { timestamp: currentTime.getTime(), ccu: Math.floor(baseCcu) };
+                const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu);
                 cumulativePositive += ratingPoint.positive;
                 cumulativeNegative += ratingPoint.negative;
                 const cumulativeTotalRatings = cumulativePositive + cumulativeNegative;
@@ -341,13 +338,22 @@
                 return { ...d, avgCcu: Math.round(sum / windowData.length) };
             });
         }
-
-        function createCcuDataPoint(date, ccu, isUpdateDay) {
-            // isUpdateDayによる日次レベルでのブーストを削除し、補間時にスパイクを生成するように変更
-            return { timestamp: date.getTime(), ccu: Math.floor(ccu) };
+        
+        function recalculateMovingAverageForInterpolatedData(data, dailyWindowSize = 14) {
+            const windowSize = dailyWindowSize * 48; // 14 days * 48 half-hours/day
+            return data.map((d, i, arr) => {
+                const start = Math.max(0, i - windowSize + 1);
+                const end = i + 1;
+                const windowData = arr.slice(start, end);
+                const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
+                return { ...d, avgCcu: Math.round(sum / windowData.length) };
+            });
         }
 
-        function createRatingDataPoint(date, ccu, positiveRatingsBoost, negativeRatingsBoost) {
+        function createRatingDataPoint(date, ccu) {
+            const isUpdateDay = date.getDate() === 1;
+            let positiveRatingsBoost = isUpdateDay ? 200000 : 0;
+            let negativeRatingsBoost = isUpdateDay ? 15000 : 0;
             const dailyPositiveBase = ccu * (0.001 + Math.random() * 0.001);
             const dailyNegativeBase = ccu * (0.0001 + Math.random() * 0.0001);
             return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
@@ -360,20 +366,21 @@
         }
 
         function interpolateData(dailyData, granularity) {
-            if (granularity === '1d' || dailyData.length <= 1) return dailyData;
+            if (dailyData.length <= 1) return dailyData;
+            
             const interpolated = [];
-            const intervalMs = granularity === '30m' ? 30 * 60 * 1000 : 60 * 60 * 1000;
+            const intervalMs = 30 * 60 * 1000; // 常に30分で補間
+
             for (let i = 0; i < dailyData.length - 1; i++) {
                 const d1 = dailyData[i];
                 const d2 = dailyData[i + 1];
 
-                // 日付が1日ならアップデート日と判定
                 const isUpdateDay = new Date(d1.timestamp).getDate() === 1;
-                // アップデートのピーク時刻をその日のUTC 09:00 (JST 18:00) に設定
-                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000;
+                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000; // UTC 09:00 (JST 18:00)
 
                 let lastKnownPoint = { ...d1 };
                 interpolated.push(lastKnownPoint);
+
                 let currentTimestamp = d1.timestamp + intervalMs;
                 while (currentTimestamp < d2.timestamp) {
                     const ratio = (currentTimestamp - d1.timestamp) / (d2.timestamp - d1.timestamp);
@@ -385,39 +392,44 @@
                     let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
                     let ccuValue = baseCcuValue;
 
-                    // アップデート日であれば、CCUに急激なスパイクを生成
                     if (isUpdateDay) {
                         const timeDiffHours = (currentTimestamp - updatePeakTime) / (3600 * 1000);
-                        const peakMultiplier = 8.0; // ピーク時の倍率
+                        const peakMultiplier = 8.0;
                         let spikeFactor = 1.0;
-
-                        // ピークの前後数時間のみスパイクを適用
                         if (timeDiffHours >= -3 && timeDiffHours <= 8) { 
-                            if (timeDiffHours < 0) {
-                                // ピークに向かって指数関数的に急上昇
-                                const riseSteepness = 1.5;
-                                spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(riseSteepness * timeDiffHours);
-                            } else {
-                                // ピーク後、指数関数的に減衰（だんだん緩やかになる）
-                                const decaySteepness = 0.8;
-                                spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(-decaySteepness * timeDiffHours);
-                            }
+                            if (timeDiffHours < 0) spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(1.5 * timeDiffHours);
+                            else spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(-0.8 * timeDiffHours);
                         }
                         ccuValue = baseCcuValue * spikeFactor;
                     }
 
-                    const currentCumulativePositive = d1.cumulativePositive + (d2.cumulativePositive - d1.cumulativePositive) * ratio;
-                    const currentCumulativeNegative = d1.cumulativeNegative + (d2.cumulativeNegative - d1.cumulativeNegative) * ratio;
+                    ccuValue = Math.max(0, ccuValue);
+
+                    // CCUに連動した評価数を計算
+                    const intervalHours = intervalMs / (3600 * 1000); // 0.5
+                    const positiveRatingsBoost = isUpdateDay ? 200000 : 0;
+                    const negativeRatingsBoost = isUpdateDay ? 15000 : 0;
+                    const intervalPositiveBoost = positiveRatingsBoost / (24 / intervalHours);
+                    const intervalNegativeBoost = negativeRatingsBoost / (24 / intervalHours);
+                    const intervalPositiveBase = ccuValue * (0.001 + Math.random() * 0.001);
+                    const intervalNegativeBase = ccuValue * (0.0001 + Math.random() * 0.0001);
+                    const positiveThisInterval = (intervalPositiveBase / (24 / intervalHours)) + intervalPositiveBoost;
+                    const negativeThisInterval = (intervalNegativeBase / (24 / intervalHours)) + intervalNegativeBoost;
+
+                    const currentCumulativePositive = lastKnownPoint.cumulativePositive + positiveThisInterval;
+                    const currentCumulativeNegative = lastKnownPoint.cumulativeNegative + negativeThisInterval;
                     const totalRatings = currentCumulativePositive + currentCumulativeNegative;
                     const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
+
                     const newPoint = {
-                        timestamp: currentTimestamp, ccu: Math.floor(Math.max(0, ccuValue)), // 負の値にならないように
-                        avgCcu: Math.round(d1.avgCcu + (d2.avgCcu - d1.avgCcu) * ratio),
-                        positive: Math.max(0, Math.round(currentCumulativePositive - lastKnownPoint.cumulativePositive)),
-                        negative: Math.max(0, Math.round(currentCumulativeNegative - lastKnownPoint.cumulativeNegative)),
-                        ratio: parseFloat(currentRatio.toFixed(2)),
+                        timestamp: currentTimestamp,
+                        ccu: Math.floor(ccuValue),
+                        avgCcu: 0, // 後で再計算
+                        positive: Math.round(positiveThisInterval),
+                        negative: Math.round(negativeThisInterval),
                         cumulativePositive: Math.round(currentCumulativePositive),
                         cumulativeNegative: Math.round(currentCumulativeNegative),
+                        ratio: parseFloat(currentRatio.toFixed(2)),
                     };
                     interpolated.push(newPoint);
                     lastKnownPoint = { ...newPoint };
@@ -425,6 +437,7 @@
                 }
             }
             if (dailyData.length > 0) interpolated.push({ ...dailyData[dailyData.length - 1] });
+            
             return interpolated;
         }
 
@@ -450,9 +463,7 @@
             const chartContainer = document.querySelector("#apex-chart");
             
             if (!data || data.length === 0) {
-                if (chart) {
-                    chart.updateSeries([]);
-                }
+                if (chart) chart.updateSeries([]);
                 chartContainer.innerHTML = "";
                 return;
             }
@@ -463,26 +474,18 @@
             const labelColor = isLightMode ? '#333' : '#fff';
 
             let series, yaxis, colors, title, stroke, chartType;
-
-            // Y軸の値を省略形にするためのフォーマッター関数
+            
             const yAxisFormatter = function(val) {
-                if (val >= 1000000000000) return (val / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
-                if (val >= 1000000000) return (val / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
                 if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
                 if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
                 return val !== null && val !== undefined ? Math.round(val) : '0';
             };
 
             switch(activeChartType) {
-                case 'ccu':
-                    chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
-                case 'daily-ratings':
-                    chartType = 'bar'; series = [ { name: '日次高評価数', data: data.map(d => [d.timestamp, d.positive]) }, { name: '日次低評価数', data: data.map(d => [d.timestamp, d.negative]) } ]; colors = ['#34D399', '#F87171']; title = '日次評価数'; stroke = { show: true, width: 2, colors: ['transparent'] }; yaxis = { title: { text: '評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
-                case 'cumulative-ratings':
-                    chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter }, stacked: false }; break;
-                case 'ratio':
-                    chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 };
-                    yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
+                case 'ccu': chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
+                case 'daily-ratings': chartType = 'bar'; series = [ { name: '日次高評価数', data: data.map(d => [d.timestamp, d.positive]) }, { name: '日次低評価数', data: data.map(d => [d.timestamp, d.negative]) } ]; colors = ['#34D399', '#F87171']; title = '日次評価数'; stroke = { show: true, width: 2, colors: ['transparent'] }; yaxis = { title: { text: '評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
+                case 'cumulative-ratings': chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter }, stacked: false }; break;
+                case 'ratio': chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 }; yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
             }
 
             const options = {
@@ -500,21 +503,14 @@
                 plotOptions: { bar: { columnWidth: '70%', dataLabels: { position: 'top' }, stacked: true } },
             };
             
-            if (chart) {
-                chart.updateOptions(options);
-            } else {
-                chart = new ApexCharts(chartContainer, options);
-                chart.render();
-            }
+            if (chart) chart.updateOptions(options);
+            else { chart = new ApexCharts(chartContainer, options); chart.render(); }
         }
 
         function renderTable(data) {
             const tableBody = document.getElementById('data-table-body');
             tableBody.innerHTML = '';
-            if (!data || data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="15" class="p-3 text-center text-gray-500">表示するデータがありません。</td></tr>`;
-                return;
-            }
+            if (!data || data.length === 0) { tableBody.innerHTML = `<tr><td colspan="15" class="p-3 text-center text-gray-500">表示するデータがありません。</td></tr>`; return; }
             const reversedData = [...data].reverse();
             reversedData.forEach((d, index) => {
                 const row = document.createElement('tr');
@@ -529,20 +525,13 @@
                 };
                 row.innerHTML = `
                     <td class="p-3 text-sm">${dateString}</td>
-                    <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
-                    <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
-                    <td class="p-3 text-sm">${(d.positive || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.positiveChange)}</td>
-                    <td class="p-3 text-sm">${(d.negative || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.negativeChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td>
-                    <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
-                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td>
-                    <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
+                    <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
+                    <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
+                    <td class="p-3 text-sm">${(d.positive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.positiveChange)}</td>
+                    <td class="p-3 text-sm">${(d.negative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.negativeChange)}</td>
+                    <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
+                    <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
+                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -568,28 +557,32 @@
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
             startDate.setHours(0, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
-            const filteredData = filterDataByDateRange(fullDailyData, startDate, endDate);
             
             let processedData;
             if (currentGranularity === '1d') {
-                // 1日粒度の場合: filteredDataを元に、アップデート日のCCUをその日の理論上のピーク値に置き換える
-                processedData = filteredData.map(d => {
+                const filteredDailyData = filterDataByDateRange(fullDailyData, startDate, endDate);
+                processedData = filteredDailyData.map(d => {
                     const date = new Date(d.timestamp);
-                    if (date.getDate() === 1) { // アップデート日（毎月1日）
-                        // 補間ロジックで使われるピーク倍率と同じ値を適用
+                    const jst1800Timestamp = d.timestamp + 9 * 3600 * 1000;
+                    if (date.getDate() === 1) { // アップデート日
                         const peakCcu = Math.floor(d.ccu * 8); 
-                        return { ...d, ccu: peakCcu };
+                        return { ...d, ccu: peakCcu, timestamp: jst1800Timestamp };
                     }
-                    return d;
+                    return { ...d, timestamp: jst1800Timestamp };
                 });
             } else {
-                // 30分/1時間粒度の場合: 従来通り補間処理を行う
-                processedData = interpolateData(filteredData, currentGranularity);
+                const startTimestamp = startDate.getTime();
+                const endTimestamp = endDate.getTime();
+                let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+
+                if (currentGranularity === '1h') {
+                    processedData = filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0);
+                } else { // 30m
+                    processedData = filteredInterpolatedData;
+                }
             }
 
-            // 最終的に処理されたデータをグローバル変数に格納し、パーセント変化を計算
             currentProcessedData = calculatePercentageChange(processedData);
-
             renderChart(currentProcessedData);
             renderTable(currentProcessedData);
             updateCounters(currentProcessedData);
@@ -607,13 +600,11 @@
             const dailyRatingsBtn = document.querySelector('[data-chart="daily-ratings"]');
             const isDailyOnly = currentGranularity !== '1d';
             dailyRatingsBtn.disabled = isDailyOnly;
-            if (isDailyOnly) { dailyRatingsBtn.classList.add('disabled-btn'); } 
-            else { dailyRatingsBtn.classList.remove('disabled-btn'); }
+            if (isDailyOnly) dailyRatingsBtn.classList.add('disabled-btn');
+            else dailyRatingsBtn.classList.remove('disabled-btn');
             if (isDailyOnly && activeChartType === 'daily-ratings') {
                 document.querySelector('[data-chart="ccu"]').click();
-            } else {
-                updateUI();
-            }
+            } else updateUI();
         }
         
         document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
@@ -643,7 +634,7 @@
             endDatePicker.disabled = days !== 'custom';
             if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
             let startDate, endDate = new Date(datasetEndDate);
-            if (days === 'all') { startDate = new Date(datasetStartDate); } 
+            if (days === 'all') startDate = new Date(datasetStartDate);
             else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
             startDatePicker.valueAsDate = startDate;
             endDatePicker.valueAsDate = endDate;
@@ -653,20 +644,17 @@
 
         startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
         endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        
-        redrawButton.addEventListener('click', () => {
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-            updateUI();
-        });
+        redrawButton.addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
 
+        // --- データ生成と初期化 ---
         const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
-        fullDailyData = calculateMovingAverage(dailyData);
+        const dailyDataWithAvgCcu = calculateMovingAverage(dailyData);
+        fullDailyData = dailyDataWithAvgCcu;
         
-        document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
+        let interpolatedData = interpolateData(fullDailyData);
+        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
 
+        document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
         document.querySelector('[data-days="all"]').click();
     });
 </script>
