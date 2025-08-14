@@ -8,8 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- noUiSlider CSS CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -104,40 +102,6 @@
             overflow-y: auto;
             overflow-x: auto; /* Added to allow horizontal scrolling for the table */
             -webkit-overflow-scrolling: touch;
-        }
-        /* noUiSlider Custom Styles */
-        #date-range-slider {
-            height: 10px;
-        }
-        .noUi-connect {
-            background: #3b82f6;
-        }
-        .noUi-handle {
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid #3b82f6;
-            box-shadow: none;
-            cursor: grab;
-        }
-        .noUi-handle:active {
-             cursor: grabbing;
-        }
-        .noUi-handle:after, .noUi-handle:before {
-            display: none;
-        }
-        .noUi-tooltip {
-            font-size: 0.75rem;
-            padding: 2px 4px;
-            background-color: #1a202c;
-            color: #e2e8f0;
-            border: 1px solid #4a5568;
-        }
-        @media (prefers-color-scheme: light) {
-            .noUi-tooltip {
-                background-color: #ffffff;
-                color: #1a202c;
-                border-color: #e2e8f0;
-            }
         }
     </style>
 </head>
@@ -243,21 +207,15 @@
                     <button data-days="all" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">全期間</button>
                     <button data-days="custom" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">カスタム</button>
                 </div>
-            </div>
-            <!-- Date Range Slider -->
-            <div id="date-range-slider-container" class="pt-6 pb-2 px-2">
-                <div id="date-range-slider"></div>
-            </div>
-             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="flex items-center space-x-4">
                     <div class="flex flex-col items-start md:items-center md:flex-row md:space-x-2">
                         <div class="flex items-center space-x-2">
                             <label for="start-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">開始日:</label>
-                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg">
+                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
                         </div>
                         <div class="flex items-center space-x-2 mt-2 md:mt-0">
                             <label for="end-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">終了日:</label>
-                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg">
+                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
                         </div>
                     </div>
                     <button id="redraw-chart-btn" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors flex-shrink-0">再描画</button>
@@ -269,6 +227,10 @@
         </div>
         <div id="chart-container" class="mt-4">
             <div id="apex-chart"></div>
+        </div>
+        <!-- Brush Chart Container -->
+        <div id="chart-brush-container" class="mt-2">
+             <div id="apex-brush-chart"></div>
         </div>
     </div>
 
@@ -302,25 +264,22 @@
 </div>
 <!-- ApexCharts JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<!-- noUiSlider JS Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
         let fullDailyData = [];
-        let fullInterpolatedData30m = []; // 全期間の30分粒度データをキャッシュ
+        let fullInterpolatedData30m = [];
         let chart;
+        let brushChart; // Brush chart instance
         let currentGranularity = '1d';
         let activeChartType = 'ccu';
         let currentProcessedData = [];
-        let isSliderUpdating = false; // スライダー更新中のフラグ
+        let isBrushUpdating = false; // Flag to prevent event loops
 
         const datasetStartDate = new Date('2025-12-31T00:00:00Z');
         const datasetEndDate = new Date('2030-01-01T00:00:00Z');
 
-        // --- DOM Elements ---
-        const rangeSlider = document.getElementById('date-range-slider');
+        // UI Elements
         const dateRangeContainer = document.getElementById('date-range-buttons');
         const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
         const startDatePicker = document.getElementById('start-date-picker');
@@ -401,7 +360,6 @@
 
         function createRatingDataPoint(date, ccu) {
             const isUpdateDay = date.getDate() === 1;
-            // Target: ~100M positive, ~1M negative over ~4 years (1460 days)
             let positiveRatingsBoost = isUpdateDay ? 1200000 : 0;
             let negativeRatingsBoost = isUpdateDay ? 5000 : 0;
             const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
@@ -409,25 +367,15 @@
             return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
         }
 
-        function filterDataByDateRange(allData, startDate, endDate) {
-            const startTimestamp = startDate.getTime();
-            const endTimestamp = endDate.getTime();
-            return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
-        }
-
         function interpolateData(dailyData) {
             if (dailyData.length <= 1) return dailyData;
-            
             const interpolated = [];
             const intervalMs = 30 * 60 * 1000;
-
             for (let i = 0; i < dailyData.length - 1; i++) {
                 const d1 = dailyData[i];
                 const d2 = dailyData[i + 1];
-
                 const isUpdateDay = new Date(d1.timestamp).getDate() === 1;
-                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000; // UTC 09:00 (JST 18:00)
-
+                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000;
                 const intervalsForDay = [];
                 let tempTimestamp = d1.timestamp;
                 while (tempTimestamp < d2.timestamp) {
@@ -438,7 +386,6 @@
                     const randomNoise = (Math.random() - 0.5) * 0.1;
                     let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
                     let ccuValue = baseCcuValue;
-
                     if (isUpdateDay) {
                         const timeDiffHours = (tempTimestamp - updatePeakTime) / (3600 * 1000);
                         const peakMultiplier = 8.0;
@@ -452,31 +399,20 @@
                     intervalsForDay.push({ timestamp: tempTimestamp, ccu: Math.max(0, ccuValue) });
                     tempTimestamp += intervalMs;
                 }
-                
                 const totalCcuForDay = intervalsForDay.reduce((sum, interval) => sum + interval.ccu, 0);
-
                 let lastKnownPoint = { ...d1 };
                 interpolated.push(lastKnownPoint);
-
                 for(const interval of intervalsForDay.slice(1)) {
                     const ccuRatio = totalCcuForDay > 0 ? interval.ccu / totalCcuForDay : 0;
                     const positiveThisInterval = d1.positive * ccuRatio;
                     const negativeThisInterval = d1.negative * ccuRatio;
-                    
                     const currentCumulativePositive = lastKnownPoint.cumulativePositive + positiveThisInterval;
                     const currentCumulativeNegative = lastKnownPoint.cumulativeNegative + negativeThisInterval;
                     const totalRatings = currentCumulativePositive + currentCumulativeNegative;
                     const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
-
                     const newPoint = {
-                        timestamp: interval.timestamp,
-                        ccu: Math.floor(interval.ccu),
-                        avgCcu: 0,
-                        positive: positiveThisInterval,
-                        negative: negativeThisInterval,
-                        cumulativePositive: currentCumulativePositive,
-                        cumulativeNegative: currentCumulativeNegative,
-                        ratio: parseFloat(currentRatio.toFixed(2)),
+                        timestamp: interval.timestamp, ccu: Math.floor(interval.ccu), avgCcu: 0, positive: positiveThisInterval, negative: negativeThisInterval,
+                        cumulativePositive: currentCumulativePositive, cumulativeNegative: currentCumulativeNegative, ratio: parseFloat(currentRatio.toFixed(2)),
                     };
                     interpolated.push(newPoint);
                     lastKnownPoint = { ...newPoint };
@@ -485,17 +421,11 @@
             if (dailyData.length > 0) {
                  const lastData = dailyData[dailyData.length-1];
                  const existingLast = interpolated.find(p => p.timestamp === lastData.timestamp);
-                 if(!existingLast) {
-                    interpolated.push(lastData);
-                 }
+                 if(!existingLast) interpolated.push(lastData);
             }
-            
             return interpolated.map(p => ({
-                ...p,
-                positive: Math.round(p.positive),
-                negative: Math.round(p.negative),
-                cumulativePositive: Math.round(p.cumulativePositive),
-                cumulativeNegative: Math.round(p.cumulativeNegative)
+                ...p, positive: Math.round(p.positive), negative: Math.round(p.negative),
+                cumulativePositive: Math.round(p.cumulativePositive), cumulativeNegative: Math.round(p.cumulativeNegative)
             }));
         }
 
@@ -514,24 +444,14 @@
                 return { ...d, ccuChange, avgCcuChange, cumulativePositiveChange, cumulativeNegativeChange, ratioChange };
             });
         }
-
-        function renderChart(data) {
-            const chartContainer = document.querySelector("#apex-chart");
-            
-            if (!data || data.length === 0) {
-                if (chart) chart.updateSeries([]);
-                chartContainer.innerHTML = "";
-                return;
-            }
-            
+        
+        function updateMainChart(data) {
             const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
             const tooltipTheme = isLightMode ? 'light' : 'dark';
-            const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
             const labelColor = isLightMode ? '#333' : '#fff';
 
             let series, yaxis, colors, title, stroke, chartType;
-            
-            const yAxisFormatter = function(val) {
+            const yAxisFormatter = val => {
                 if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
                 if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
                 return val !== null && val !== undefined ? Math.round(val) : '0';
@@ -545,20 +465,88 @@
 
             const options = {
                 series: series,
-                chart: { id: 'sample-game-chart', type: chartType, height: 400, toolbar: { show: true, autoSelected: 'zoom' }, background: isLightMode ? '#ffffff' : '#2d3748', fontFamily: 'Roboto, sans-serif' },
-                colors: colors,
-                stroke: stroke,
-                title: { text: title, align: 'left', style: { color: labelColor } },
-                xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd HH:mm' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
-                yaxis: yaxis,
+                chart: { type: chartType, background: isLightMode ? '#ffffff' : '#2d3748' },
+                colors: colors, stroke: stroke, title: { text: title, style: { color: labelColor } },
+                xaxis: { labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd' : 'MM/dd HH:mm' } },
+                yaxis: yaxis, legend: { labels: { colors: labelColor } },
                 tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
-                dataLabels: { enabled: false },
-                legend: { position: 'top', horizontalAlign: 'right', labels: { colors: labelColor } },
-                grid: { borderColor: gridBorderColor },
             };
             
-            if (chart) chart.updateOptions(options);
-            else { chart = new ApexCharts(document.querySelector("#apex-chart"), options); chart.render(); }
+            if (chart) chart.updateOptions(options, true, true);
+        }
+
+        function initializeCharts() {
+            const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+            const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
+            const labelColor = isLightMode ? '#333' : '#fff';
+
+            const mainChartOptions = {
+                series: [],
+                chart: { id: 'main-chart', height: 400, type: 'line', toolbar: { autoSelected: 'zoom' }, background: 'transparent', fontFamily: 'Roboto, sans-serif' },
+                dataLabels: { enabled: false }, legend: { position: 'top', horizontalAlign: 'right' }, grid: { borderColor: gridBorderColor },
+                xaxis: { type: 'datetime', labels: { datetimeUTC: false, style: { colors: labelColor } }, tooltip: { enabled: true } },
+            };
+
+            const brushChartOptions = {
+                series: [{ name: 'CCU', data: fullDailyData.map(d => [d.timestamp, d.ccu]) }],
+                chart: {
+                    id: 'brush-chart', height: 130, type: 'area', background: 'transparent', fontFamily: 'Roboto, sans-serif',
+                    brush: { target: 'main-chart', enabled: true },
+                    selection: { enabled: true },
+                    events: {
+                        selection: function(chartContext, { xaxis, yaxis }) {
+                            if (isBrushUpdating) return;
+                            const newStartDate = new Date(xaxis.min);
+                            const newEndDate = new Date(xaxis.max);
+                            startDatePicker.valueAsDate = newStartDate;
+                            endDatePicker.valueAsDate = newEndDate;
+                            processAndDisplayData(newStartDate, newEndDate);
+                            updateActiveButton(dateRangeButtons, 'custom');
+                        }
+                    }
+                },
+                colors: ['#008FFB'], grid: { borderColor: gridBorderColor },
+                xaxis: { type: 'datetime', tooltip: { enabled: true }, labels: { datetimeUTC: false, style: { colors: labelColor } } },
+                yaxis: { tickAmount: 2, labels: { style: { colors: labelColor }, formatter: val => val >= 1000 ? (val / 1000) + 'K' : Math.round(val) } }
+            };
+
+            chart = new ApexCharts(document.querySelector("#apex-chart"), mainChartOptions);
+            chart.render();
+            brushChart = new ApexCharts(document.querySelector("#apex-brush-chart"), brushChartOptions);
+            brushChart.render();
+        }
+
+        function processAndDisplayData(startDate, endDate) {
+            startDate.setUTCHours(0, 0, 0, 0);
+            endDate.setUTCHours(23, 59, 59, 999);
+            let processedData;
+            if (currentGranularity === '1d') {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                processedData = fullDailyData.filter(d => d.timestamp >= start.getTime() && d.timestamp <= end.getTime());
+            } else {
+                const startTimestamp = startDate.getTime();
+                const endTimestamp = endDate.getTime();
+                let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+                processedData = (currentGranularity === '1h') ? filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0) : filteredInterpolatedData;
+            }
+            currentProcessedData = calculatePercentageChange(processedData);
+            updateMainChart(currentProcessedData);
+            renderTable(currentProcessedData);
+            updateCounters(currentProcessedData);
+        }
+
+        function updateUI() {
+            const startDate = new Date(startDatePicker.value);
+            const endDate = new Date(endDatePicker.value);
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+            
+            processAndDisplayData(startDate, endDate);
+            
+            isBrushUpdating = true;
+            brushChart.updateOptions({
+                chart: { selection: { xaxis: { min: startDate.getTime(), max: endDate.getTime() } } }
+            }, false, false).then(() => { isBrushUpdating = false; });
         }
 
         function renderTable(data) {
@@ -570,27 +558,21 @@
                 const row = document.createElement('tr');
                 row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
                 const date = new Date(d.timestamp);
-                let dateString;
-                 if (currentGranularity === '1d') {
-                    dateString = date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                } else {
-                    dateString = date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-                }
-
+                let dateString = (currentGranularity === '1d')
+                    ? date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                    : date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
                 const formatChange = (change) => {
                     if (change === null || !isFinite(change)) return '-';
                     const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
                     const arrow = change >= 0 ? '▲' : '▼';
                     return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
                 };
-                row.innerHTML = `
-                    <td class="p-3 text-sm">${dateString}</td>
+                row.innerHTML = `<td class="p-3 text-sm">${dateString}</td>
                     <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
                     <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
                     <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
                     <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
-                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
-                `;
+                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>`;
                 tableBody.appendChild(row);
             });
         }
@@ -609,49 +591,6 @@
             for (const id in counters) { document.getElementById(id).textContent = counters[id]; }
         }
 
-        function updateUI() {
-            const startDate = startDatePicker.valueAsDate;
-            const endDate = endDatePicker.valueAsDate;
-            if (!startDate || !endDate) return;
-            
-            startDate.setUTCHours(0, 0, 0, 0);
-            endDate.setUTCHours(23, 59, 59, 999);
-            
-            let processedData;
-            if (currentGranularity === '1d') {
-                processedData = [];
-                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const dayStart = new Date(d); dayStart.setUTCHours(0, 0, 0, 0);
-                    const dayEnd = new Date(d); dayEnd.setUTCHours(23, 59, 59, 999);
-
-                    const dataForDay = fullInterpolatedData30m.filter(p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime());
-                    if (dataForDay.length === 0) continue;
-
-                    let representativePoint = dataForDay.find(p => {
-                        const pointDate = new Date(p.timestamp);
-                        return pointDate.getUTCHours() === 9 && pointDate.getUTCMinutes() === 0;
-                    }) || dataForDay[dataForDay.length - 1];
-                    
-                    processedData.push({ ...representativePoint });
-                }
-            } else {
-                const startTimestamp = startDate.getTime();
-                const endTimestamp = endDate.getTime();
-                let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
-
-                if (currentGranularity === '1h') {
-                    processedData = filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0);
-                } else { // 30m
-                    processedData = filteredInterpolatedData;
-                }
-            }
-
-            currentProcessedData = calculatePercentageChange(processedData);
-            renderChart(currentProcessedData);
-            renderTable(currentProcessedData);
-            updateCounters(currentProcessedData);
-        }
-        
         function updateActiveButton(buttons, activeIdentifier) {
             buttons.forEach(btn => {
                 const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
@@ -659,10 +598,8 @@
                 else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
             });
         }
-
-        // --- Event Listeners ---
+        
         document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
-            if (button.disabled) return;
             activeChartType = button.dataset.chart;
             updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
             updateUI();
@@ -678,71 +615,31 @@
             const button = e.target.closest('button');
             if (!button) return;
             const days = button.dataset.days;
-            let startDate, endDate = new Date(datasetEndDate);
+            startDatePicker.disabled = days !== 'custom';
+            endDatePicker.disabled = days !== 'custom';
             if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
+            let startDate, endDate = new Date(datasetEndDate);
             if (days === 'all') startDate = new Date(datasetStartDate);
             else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
-            
-            isSliderUpdating = true;
             startDatePicker.valueAsDate = startDate;
             endDatePicker.valueAsDate = endDate;
-            rangeSlider.noUiSlider.set([startDate.getTime(), endDate.getTime()]);
-            isSliderUpdating = false;
-
             updateActiveButton(dateRangeButtons, days);
             updateUI();
         });
 
-        const onDateChange = () => {
-             isSliderUpdating = true;
-             rangeSlider.noUiSlider.set([startDatePicker.valueAsDate.getTime(), endDatePicker.valueAsDate.getTime()]);
-             isSliderUpdating = false;
-             updateActiveButton(dateRangeButtons, 'custom');
-             updateUI();
-        }
+        startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+        endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+        redrawButton.addEventListener('click', updateUI);
 
-        startDatePicker.addEventListener('change', onDateChange);
-        endDatePicker.addEventListener('change', onDateChange);
-        redrawButton.addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
-
-        // --- Data Generation and Initialization ---
+        // --- データ生成と初期化 ---
         const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
         fullDailyData = calculateMovingAverage(dailyData);
-        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolateData(fullDailyData));
+        let interpolatedData = interpolateData(fullDailyData);
+        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
+        
+        initializeCharts();
+        
         document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
-        
-        // --- Slider Initialization ---
-        const formatDate = (date) => date.toLocaleDateString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit' });
-        const timeStamp = (str) => new Date(str).getTime();
-        
-        noUiSlider.create(rangeSlider, {
-            range: {
-                min: timeStamp(datasetStartDate.toISOString()),
-                max: timeStamp(datasetEndDate.toISOString())
-            },
-            step: 24 * 60 * 60 * 1000, // 1 day
-            start: [timeStamp(datasetStartDate.toISOString()), timeStamp(datasetEndDate.toISOString())],
-            connect: true,
-            tooltips: {
-                to: (value) => formatDate(new Date(Number(value))),
-                from: (value) => Number(value)
-            }
-        });
-
-        rangeSlider.noUiSlider.on('update', (values, handle) => {
-            if(isSliderUpdating) return; // Prevent infinite loop
-            const [startTimestamp, endTimestamp] = values.map(v => new Date(Number(v)));
-            startDatePicker.valueAsDate = startTimestamp;
-            endDatePicker.valueAsDate = endTimestamp;
-        });
-
-        rangeSlider.noUiSlider.on('change', () => {
-            if(isSliderUpdating) return;
-            updateActiveButton(dateRangeButtons, 'custom');
-            updateUI();
-        });
-
-        // --- Initial Load ---
         document.querySelector('[data-days="all"]').click();
     });
 </script>
