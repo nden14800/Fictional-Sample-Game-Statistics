@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- noUiSlider CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -102,6 +104,40 @@
             overflow-y: auto;
             overflow-x: auto; /* Added to allow horizontal scrolling for the table */
             -webkit-overflow-scrolling: touch;
+        }
+        /* noUiSlider Custom Styles */
+        #date-range-slider {
+            height: 10px;
+        }
+        .noUi-connect {
+            background: #3b82f6;
+        }
+        .noUi-handle {
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #3b82f6;
+            box-shadow: none;
+            cursor: grab;
+        }
+        .noUi-handle:active {
+             cursor: grabbing;
+        }
+        .noUi-handle:after, .noUi-handle:before {
+            display: none;
+        }
+        .noUi-tooltip {
+            font-size: 0.75rem;
+            padding: 2px 4px;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+        }
+        @media (prefers-color-scheme: light) {
+            .noUi-tooltip {
+                background-color: #ffffff;
+                color: #1a202c;
+                border-color: #e2e8f0;
+            }
         }
     </style>
 </head>
@@ -207,15 +243,21 @@
                     <button data-days="all" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">全期間</button>
                     <button data-days="custom" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">カスタム</button>
                 </div>
+            </div>
+            <!-- Date Range Slider -->
+            <div id="date-range-slider-container" class="pt-6 pb-2 px-2">
+                <div id="date-range-slider"></div>
+            </div>
+             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="flex items-center space-x-4">
                     <div class="flex flex-col items-start md:items-center md:flex-row md:space-x-2">
                         <div class="flex items-center space-x-2">
                             <label for="start-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">開始日:</label>
-                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
+                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg">
                         </div>
                         <div class="flex items-center space-x-2 mt-2 md:mt-0">
                             <label for="end-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">終了日:</label>
-                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
+                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg">
                         </div>
                     </div>
                     <button id="redraw-chart-btn" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors flex-shrink-0">再描画</button>
@@ -260,6 +302,9 @@
 </div>
 <!-- ApexCharts JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- noUiSlider JS Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -269,9 +314,18 @@
         let currentGranularity = '1d';
         let activeChartType = 'ccu';
         let currentProcessedData = [];
+        let isSliderUpdating = false; // スライダー更新中のフラグ
 
         const datasetStartDate = new Date('2025-12-31T00:00:00Z');
         const datasetEndDate = new Date('2030-01-01T00:00:00Z');
+
+        // --- DOM Elements ---
+        const rangeSlider = document.getElementById('date-range-slider');
+        const dateRangeContainer = document.getElementById('date-range-buttons');
+        const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
+        const startDatePicker = document.getElementById('start-date-picker');
+        const endDatePicker = document.getElementById('end-date-picker');
+        const redrawButton = document.getElementById('redraw-chart-btn');
 
         function generateDailyData(startDate, endDate) {
             const data = [];
@@ -504,7 +558,7 @@
             };
             
             if (chart) chart.updateOptions(options);
-            else { chart = new ApexCharts(chartContainer, options); chart.render(); }
+            else { chart = new ApexCharts(document.querySelector("#apex-chart"), options); chart.render(); }
         }
 
         function renderTable(data) {
@@ -556,9 +610,10 @@
         }
 
         function updateUI() {
-            const startDate = new Date(document.getElementById('start-date-picker').value);
-            const endDate = new Date(document.getElementById('end-date-picker').value);
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+            const startDate = startDatePicker.valueAsDate;
+            const endDate = endDatePicker.valueAsDate;
+            if (!startDate || !endDate) return;
+            
             startDate.setUTCHours(0, 0, 0, 0);
             endDate.setUTCHours(23, 59, 59, 999);
             
@@ -566,32 +621,18 @@
             if (currentGranularity === '1d') {
                 processedData = [];
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const dayStart = new Date(d);
-                    dayStart.setUTCHours(0, 0, 0, 0);
-                    const dayEnd = new Date(d);
-                    dayEnd.setUTCHours(23, 59, 59, 999);
+                    const dayStart = new Date(d); dayStart.setUTCHours(0, 0, 0, 0);
+                    const dayEnd = new Date(d); dayEnd.setUTCHours(23, 59, 59, 999);
 
-                    const dataForDay = fullInterpolatedData30m.filter(
-                        p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime()
-                    );
+                    const dataForDay = fullInterpolatedData30m.filter(p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime());
                     if (dataForDay.length === 0) continue;
 
                     let representativePoint = dataForDay.find(p => {
                         const pointDate = new Date(p.timestamp);
                         return pointDate.getUTCHours() === 9 && pointDate.getUTCMinutes() === 0;
-                    });
-                    if (!representativePoint) {
-                        representativePoint = dataForDay[dataForDay.length - 1];
-                    }
+                    }) || dataForDay[dataForDay.length - 1];
                     
-                    processedData.push({
-                        timestamp: representativePoint.timestamp,
-                        ccu: representativePoint.ccu,
-                        avgCcu: representativePoint.avgCcu,
-                        cumulativePositive: representativePoint.cumulativePositive,
-                        cumulativeNegative: representativePoint.cumulativeNegative,
-                        ratio: representativePoint.ratio,
-                    });
+                    processedData.push({ ...representativePoint });
                 }
             } else {
                 const startTimestamp = startDate.getTime();
@@ -610,7 +651,7 @@
             renderTable(currentProcessedData);
             updateCounters(currentProcessedData);
         }
-
+        
         function updateActiveButton(buttons, activeIdentifier) {
             buttons.forEach(btn => {
                 const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
@@ -618,7 +659,8 @@
                 else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
             });
         }
-        
+
+        // --- Event Listeners ---
         document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
             if (button.disabled) return;
             activeChartType = button.dataset.chart;
@@ -632,40 +674,75 @@
             updateUI();
         }));
 
-        const dateRangeContainer = document.getElementById('date-range-buttons');
-        const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
-        const startDatePicker = document.getElementById('start-date-picker');
-        const endDatePicker = document.getElementById('end-date-picker');
-        const redrawButton = document.getElementById('redraw-chart-btn');
-
         dateRangeContainer.addEventListener('click', (e) => {
             const button = e.target.closest('button');
             if (!button) return;
             const days = button.dataset.days;
-            startDatePicker.disabled = days !== 'custom';
-            endDatePicker.disabled = days !== 'custom';
-            if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
             let startDate, endDate = new Date(datasetEndDate);
+            if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
             if (days === 'all') startDate = new Date(datasetStartDate);
             else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
+            
+            isSliderUpdating = true;
             startDatePicker.valueAsDate = startDate;
             endDatePicker.valueAsDate = endDate;
+            rangeSlider.noUiSlider.set([startDate.getTime(), endDate.getTime()]);
+            isSliderUpdating = false;
+
             updateActiveButton(dateRangeButtons, days);
             updateUI();
         });
 
-        startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+        const onDateChange = () => {
+             isSliderUpdating = true;
+             rangeSlider.noUiSlider.set([startDatePicker.valueAsDate.getTime(), endDatePicker.valueAsDate.getTime()]);
+             isSliderUpdating = false;
+             updateActiveButton(dateRangeButtons, 'custom');
+             updateUI();
+        }
+
+        startDatePicker.addEventListener('change', onDateChange);
+        endDatePicker.addEventListener('change', onDateChange);
         redrawButton.addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
 
-        // --- データ生成と初期化 ---
+        // --- Data Generation and Initialization ---
         const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
         fullDailyData = calculateMovingAverage(dailyData);
-        
-        let interpolatedData = interpolateData(fullDailyData);
-        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
-
+        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolateData(fullDailyData));
         document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
+        
+        // --- Slider Initialization ---
+        const formatDate = (date) => date.toLocaleDateString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit' });
+        const timeStamp = (str) => new Date(str).getTime();
+        
+        noUiSlider.create(rangeSlider, {
+            range: {
+                min: timeStamp(datasetStartDate.toISOString()),
+                max: timeStamp(datasetEndDate.toISOString())
+            },
+            step: 24 * 60 * 60 * 1000, // 1 day
+            start: [timeStamp(datasetStartDate.toISOString()), timeStamp(datasetEndDate.toISOString())],
+            connect: true,
+            tooltips: {
+                to: (value) => formatDate(new Date(Number(value))),
+                from: (value) => Number(value)
+            }
+        });
+
+        rangeSlider.noUiSlider.on('update', (values, handle) => {
+            if(isSliderUpdating) return; // Prevent infinite loop
+            const [startTimestamp, endTimestamp] = values.map(v => new Date(Number(v)));
+            startDatePicker.valueAsDate = startTimestamp;
+            endDatePicker.valueAsDate = endTimestamp;
+        });
+
+        rangeSlider.noUiSlider.on('change', () => {
+            if(isSliderUpdating) return;
+            updateActiveButton(dateRangeButtons, 'custom');
+            updateUI();
+        });
+
+        // --- Initial Load ---
         document.querySelector('[data-days="all"]').click();
     });
 </script>
