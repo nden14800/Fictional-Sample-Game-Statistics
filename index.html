@@ -556,13 +556,32 @@
             const endDate = new Date(document.getElementById('end-date-picker').value);
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
             startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
+
+            // --- ▼▼▼ 修正箇所 ▼▼▼ ---
+            // データセットの最終日(UTC)
+            const dataLastDateUTC = new Date(datasetEndDate);
+            
+            // 選択された終了日がデータセットの最終日と一致するか、年月日のみで比較
+            const isLastDay = endDate.getFullYear() === dataLastDateUTC.getUTCFullYear() &&
+                              endDate.getMonth() === dataLastDateUTC.getUTCMonth() &&
+                              endDate.getDate() === dataLastDateUTC.getUTCDate();
+
+            if (isLastDay && currentGranularity !== '1d') {
+                // 粒度が30分/1時間で、かつデータセット最終日を選択した場合、
+                // 終了時刻をJST 18:00 (UTC 09:00)に設定
+                endDate.setHours(9, 0, 0, 0);
+            } else {
+                // それ以外の場合は、その日の終わり(23:59:59)に設定
+                endDate.setHours(23, 59, 59, 999);
+            }
+            // --- ▲▲▲ 修正ここまで ▲▲▲ ---
             
             let processedData;
             if (currentGranularity === '1d') {
                 const filteredDailyData = filterDataByDateRange(fullDailyData, startDate, endDate);
                 processedData = filteredDailyData.map(d => {
                     const date = new Date(d.timestamp);
+                    // 1日粒度の場合、タイムスタンプをJST 18:00に設定して表示を統一
                     const jst1800Timestamp = d.timestamp + 9 * 3600 * 1000;
                     if (date.getDate() === 1) { // アップデート日
                         const peakCcu = Math.floor(d.ccu * 8); 
