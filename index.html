@@ -106,7 +106,6 @@
     </style>
 </head>
 <body>
-
 <div class="container w-full mx-auto p-4 md:p-8">
     <!-- Header -->
     <header class="text-center mb-8">
@@ -115,533 +114,573 @@
         </h1>
         <p class="text-gray-400 mt-2">この統計はシミュレーションに基づく架空のデータであり、実際のものではありません。</p>
     </header>
+code
+Code
 
-    <!-- Counters section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-            <div class="flex items-center text-xl font-bold text-blue-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people mr-2" viewBox="0 0 16 16">
-                    <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
-                </svg>
-                <span>CCU</span>
-            </div>
-            <p id="ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+download
+
+content_copy
+
+expand_less
+<!-- Counters section -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <div class="flex items-center text-xl font-bold text-blue-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people mr-2" viewBox="0 0 16 16">
+                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+            </svg>
+            <span>CCU</span>
         </div>
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-            <div class="flex items-center text-xl font-bold text-cyan-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up-arrow mr-2" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
-                </svg>
-                <span>期間内平均CCU</span>
-            </div>
-            <p id="avg-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
-        </div>
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-            <div class="flex items-center text-xl font-bold text-green-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hand-thumbs-up mr-2" viewBox="0 0 16 16">
-                    <path d="M8.864.046C7.908-.193 7.02.53 6.956 1.466c-.072 1.051-.23 2.016-.428 2.59-.125.36-.479 1.013-1.04 1.639-.557.623-1.282 1.178-2.131 1.41C2.685 7.288 2 7.87 2 8.72v4.001c0 .845.682 1.464 1.448 1.545 1.07.114 1.564.415 2.068.723l.048.03c.272.165.578.348.97.484.397.136.861.217 1.466.217h3.5c.937 0 1.599-.477 1.934-1.064a1.86 1.86 0 0 0 .254-.912c0-.152-.023-.312-.077-.464.201-.263.38-.578.488-.901.11-.33.172-.762.004-1.149.069-.13.12-.269.159-.403.077-.27.113-.568.113-.857 0-.288-.036-.585-.113-.856a2 2 0 0 0-.138-.362 1.9 1.9 0 0 0 .234-1.734c-.206-.592-.682-1.1-1.2-1.272-.847-.282-1.803-.276-2.516-.211a10 10 0 0 0-.443.05 9.4 9.4 0 0 0-.062-4.509A1.38 1.38 0 0 0 9.125.111zM11.5 14.721H8c-.51 0-.863-.069-1.14-.164-.281-.097-.506-.228-.776-.393l-.04-.024c-.555-.339-1.198-.731-2.49-.868-.333-.036-.554-.29-.554-.55V8.72c0-.254.226-.543.62-.65 1.095-.3 1.977-.996 2.614-1.708.635-.71 1.064-1.475 1.238-1.978.243-.7.407-1.768.482-2.85.025-.362.36-.594.667-.518l.262.066c.16.04.258.143.288.255a8.34 8.34 0 0 1-.145 4.725.5.5 0 0 0 .595.644l.003-.001.014-.003.058-.014a9 9 0 0 1 1.036-.157c.663-.06 1.457-.054 2.211.164.175.058.45.3.57.65.107.308.087.67-.266 1.022l-.353.353.353.354c.043.043.105.141.154.315.048.167.075.37.075.581 0 .212-.027.414-.075.582-.05.174-.111.272-.154.315l-.353.353.353.354c.047.047.109.177.005.488a2.2 2.2 0 0 1-.505.805l-.353.353.353.354c.006.005.041.05.041.17a.9.9 0 0 1-.121.416c-.165.288-.503.56-1.066.56z"/>
-                </svg>
-                <span>合計高評価数</span>
-            </div>
-            <p id="positive-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
-        </div>
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-            <div class="flex items-center text-xl font-bold text-red-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hand-thumbs-down mr-2" viewBox="0 0 16 16">
-                    <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077-.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682-1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1"/>
-                </svg>
-                <span>合計低評価数</span>
-            </div>
-            <p id="negative-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
-        </div>
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-             <div class="flex items-center text-xl font-bold text-yellow-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-percent mr-2" viewBox="0 0 16 16">
-                    <path d="M13.442 2.558a.625.625 0 0 1 0 .884l-10 10a.625.625 0 1 1-.884-.884l10-10a.625.625 0 0 1 .884 0M4.5 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5m7 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
-                </svg>
-                <span>高評価率</span>
-            </div>
-            <p id="positive-ratio-counter" class="text-4xl font-extrabold mt-2 counter-text">0%</p>
-        </div>
-        <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
-            <div class="flex items-center text-xl font-bold text-indigo-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-trophy mr-2" viewBox="0 0 16 16">
-                    <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/>
-                </svg>
-                <span>期間内ピークCCU</span>
-            </div>
-            <p id="peak-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
-        </div>
+        <p id="ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
     </div>
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <div class="flex items-center text-xl font-bold text-cyan-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up-arrow mr-2" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+            </svg>
+            <span>期間内平均CCU</span>
+        </div>
+        <p id="avg-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+    </div>
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <div class="flex items-center text-xl font-bold text-green-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hand-thumbs-up mr-2" viewBox="0 0 16 16">
+                <path d="M8.864.046C7.908-.193 7.02.53 6.956 1.466c-.072 1.051-.23 2.016-.428 2.59-.125.36-.479 1.013-1.04 1.639-.557.623-1.282 1.178-2.131 1.41C2.685 7.288 2 7.87 2 8.72v4.001c0 .845.682 1.464 1.448 1.545 1.07.114 1.564.415 2.068.723l.048.03c.272.165.578.348.97.484.397.136.861.217 1.466.217h3.5c.937 0 1.599-.477 1.934-1.064a1.86 1.86 0 0 0 .254-.912c0-.152-.023-.312-.077-.464.201-.263.38-.578.488-.901.11-.33.172-.762.004-1.149.069-.13.12-.269.159-.403.077-.27.113-.568.113-.857 0-.288-.036-.585-.113-.856a2 2 0 0 0-.138-.362 1.9 1.9 0 0 0 .234-1.734c-.206-.592-.682-1.1-1.2-1.272-.847-.282-1.803-.276-2.516-.211a10 10 0 0 0-.443.05 9.4 9.4 0 0 0-.062-4.509A1.38 1.38 0 0 0 9.125.111zM11.5 14.721H8c-.51 0-.863-.069-1.14-.164-.281-.097-.506-.228-.776-.393l-.04-.024c-.555-.339-1.198-.731-2.49-.868-.333-.036-.554-.29-.554-.55V8.72c0-.254.226-.543.62-.65 1.095-.3 1.977-.996 2.614-1.708.635-.71 1.064-1.475 1.238-1.978.243-.7.407-1.768.482-2.85.025-.362.36-.594.667-.518l.262.066c.16.04.258.143.288.255a8.34 8.34 0 0 1-.145 4.725.5.5 0 0 0 .595.644l.003-.001.014-.003.058-.014a9 9 0 0 1 1.036-.157c.663-.06 1.457-.054 2.211.164.175.058.45.3.57.65.107.308.087.67-.266 1.022l-.353.353.353.354c.043.043.105.141.154.315.048.167.075.37.075.581 0 .212-.027.414-.075.582-.05.174-.111.272-.154.315l-.353.353.353.354c.047.047.109.177.005.488a2.2 2.2 0 0 1-.505.805l-.353.353.353.354c.006.005.041.05.041.17a.9.9 0 0 1-.121.416c-.165.288-.503.56-1.066.56z"/>
+            </svg>
+            <span>合計高評価数</span>
+        </div>
+        <p id="positive-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+    </div>
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <div class="flex items-center text-xl font-bold text-red-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-hand-thumbs-down mr-2" viewBox="0 0 16 16">
+                <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077-.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682-1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1"/>
+            </svg>
+            <span>合計低評価数</span>
+        </div>
+        <p id="negative-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+    </div>
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+         <div class="flex items-center text-xl font-bold text-yellow-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-percent mr-2" viewBox="0 0 16 16">
+                <path d="M13.442 2.558a.625.625 0 0 1 0 .884l-10 10a.625.625 0 1 1-.884-.884l10-10a.625.625 0 0 1 .884 0M4.5 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5m7 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+            </svg>
+            <span>高評価率</span>
+        </div>
+        <p id="positive-ratio-counter" class="text-4xl font-extrabold mt-2 counter-text">0%</p>
+    </div>
+    <div class="card p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <div class="flex items-center text-xl font-bold text-indigo-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-trophy mr-2" viewBox="0 0 16 16">
+                <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/>
+            </svg>
+            <span>期間内ピークCCU</span>
+        </div>
+        <p id="peak-ccu-counter" class="text-4xl font-extrabold mt-2 counter-text">0</p>
+    </div>
+</div>
 
-    <!-- Chart section -->
-    <div class="card p-6 rounded-xl shadow-lg">
-        <div class="flex flex-col space-y-4 mb-4">
-            <div class="flex flex-wrap gap-2 items-center">
-                <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
-                <div id="chart-type-buttons">
-                    <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
-                    <button data-chart="cumulative-ratings" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計評価数</button>
-                    <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
-                </div>
+<!-- Chart section -->
+<div class="card p-6 rounded-xl shadow-lg">
+    <div class="flex flex-col space-y-4 mb-4">
+        <div class="flex flex-wrap gap-2 items-center">
+            <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
+            <div id="chart-type-buttons">
+                <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
+                <button data-chart="cumulative-ratings" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計評価数</button>
+                <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
             </div>
-            <div class="flex flex-wrap gap-2 items-center">
-                <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
-                <div id="granularity-buttons">
-                    <button data-granularity="30m" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">30分</button>
-                    <button data-granularity="1h" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">1時間</button>
-                    <button data-granularity="1d" class="px-4 py-2 granularity-btn active-btn font-bold rounded-lg transition-colors">1日</button>
-                </div>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+            <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
+            <div id="granularity-buttons">
+                <button data-granularity="30m" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">30分</button>
+                <button data-granularity="1h" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">1時間</button>
+                <button data-granularity="1d" class="px-4 py-2 granularity-btn active-btn font-bold rounded-lg transition-colors">1日</button>
             </div>
-            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                <div id="date-range-buttons" class="flex flex-wrap gap-2">
-                    <button data-days="1" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1日</button>
-                    <button data-days="3" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">3日</button>
-                    <button data-days="7" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">7日</button>
-                    <button data-days="14" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">14日</button>
-                    <button data-days="28" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">28日</button>
-                    <button data-days="56" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">56日</button>
-                    <button data-days="90" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">90日</button>
-                    <button data-days="180" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">180日</button>
-                    <button data-days="360" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">360日</button>
-                    <button data-days="all" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">全期間</button>
-                    <button data-days="custom" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">カスタム</button>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex flex-col items-start md:items-center md:flex-row md:space-x-2">
-                        <div class="flex items-center space-x-2">
-                            <label for="start-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">開始日:</label>
-                            <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-2 md:mt-0">
-                            <label for="end-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">終了日:</label>
-                            <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
-                        </div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div id="date-range-buttons" class="flex flex-wrap gap-2">
+                <button data-days="1" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">1日</button>
+                <button data-days="3" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">3日</button>
+                <button data-days="7" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">7日</button>
+                <button data-days="14" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">14日</button>
+                <button data-days="28" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">28日</button>
+                <button data-days="56" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">56日</button>
+                <button data-days="90" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">90日</button>
+                <button data-days="180" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">180日</button>
+                <button data-days="360" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">360日</button>
+                <button data-days="all" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">全期間</button>
+                <button data-days="custom" class="date-btn px-4 py-2 inactive-btn font-bold rounded-lg transition-colors">カスタム</button>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex flex-col items-start md:items-center md:flex-row md:space-x-2">
+                    <div class="flex items-center space-x-2">
+                        <label for="start-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">開始日:</label>
+                        <input type="date" id="start-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
                     </div>
-                    <button id="redraw-chart-btn" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors flex-shrink-0">再描画</button>
+                    <div class="flex items-center space-x-2 mt-2 md:mt-0">
+                        <label for="end-date-picker" class="text-gray-300 light-mode-text-black whitespace-nowrap">終了日:</label>
+                        <input type="date" id="end-date-picker" class="bg-gray-700 border border-gray-600 text-white p-2 rounded-lg" disabled>
+                    </div>
                 </div>
-            </div>
-             <div class="text-right mt-2">
-                <span id="date-range-info" class="text-xs text-gray-400"></span>
+                <button id="redraw-chart-btn" class="px-4 py-2 inactive-btn font-bold rounded-lg transition-colors flex-shrink-0">再描画</button>
             </div>
         </div>
-        <div id="chart-container" class="mt-4">
-            <div id="apex-chart"></div>
-        </div>
-        <!-- Brush Chart Container -->
-        <div id="chart-brush-container" class="mt-2">
-             <div id="apex-brush-chart"></div>
+         <div class="text-right mt-2">
+            <span id="date-range-info" class="text-xs text-gray-400"></span>
         </div>
     </div>
+    <div id="chart-container" class="mt-4">
+        <div id="apex-chart"></div>
+    </div>
+</div>
 
-    <!-- Data Table Section -->
-    <div class="card p-6 rounded-xl shadow-lg mt-8">
-        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
-            データ詳細
-        </h2>
-        <div class="data-table-container rounded-lg border border-gray-600">
-            <table class="w-full text-left table-auto">
-                <thead class="sticky top-0 z-10">
-                    <tr class="table-header">
-                        <th class="p-3 font-semibold text-sm rounded-tl-lg">日付</th>
-                        <th class="p-3 font-semibold text-sm">CCU</th>
-                        <th class="p-3 font-semibold text-sm">CCU (%)</th>
-                        <th class="p-3 font-semibold text-sm">平均CCU</th>
-                        <th class="p-3 font-semibold text-sm">平均CCU (%)</th>
-                        <th class="p-3 font-semibold text-sm">合計高評価</th>
-                        <th class="p-3 font-semibold text-sm">合計高評価 (%)</th>
-                        <th class="p-3 font-semibold text-sm">合計低評価</th>
-                        <th class="p-3 font-semibold text-sm">合計低評価 (%)</th>
-                        <th class="p-3 font-semibold text-sm">高評価率</th>
-                        <th class="p-3 font-semibold text-sm rounded-tr-lg">高評価率 (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="data-table-body">
-                </tbody>
-            </table>
-        </div>
+<!-- Data Table Section -->
+<div class="card p-6 rounded-xl shadow-lg mt-8">
+    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
+        データ詳細
+    </h2>
+    <div class="data-table-container rounded-lg border border-gray-600">
+        <table class="w-full text-left table-auto">
+            <thead class="sticky top-0 z-10">
+                <tr class="table-header">
+                    <th class="p-3 font-semibold text-sm rounded-tl-lg">日付</th>
+                    <th class="p-3 font-semibold text-sm">CCU</th>
+                    <th class="p-3 font-semibold text-sm">CCU (%)</th>
+                    <th class="p-3 font-semibold text-sm">平均CCU</th>
+                    <th class="p-3 font-semibold text-sm">平均CCU (%)</th>
+                    <th class="p-3 font-semibold text-sm">合計高評価</th>
+                    <th class="p-3 font-semibold text-sm">合計高評価 (%)</th>
+                    <th class="p-3 font-semibold text-sm">合計低評価</th>
+                    <th class="p-3 font-semibold text-sm">合計低評価 (%)</th>
+                    <th class="p-3 font-semibold text-sm">高評価率</th>
+                    <th class="p-3 font-semibold text-sm rounded-tr-lg">高評価率 (%)</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+            </tbody>
+        </table>
     </div>
+</div>
 </div>
 <!-- ApexCharts JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+code
+Code
 
-        let fullDailyData = [];
-        let fullInterpolatedData30m = [];
-        let chart;
-        let brushChart; // Brush chart instance
-        let currentGranularity = '1d';
-        let activeChartType = 'ccu';
-        let currentProcessedData = [];
-        let isBrushUpdating = false; // Flag to prevent event loops
+download
 
-        const datasetStartDate = new Date('2025-12-31T00:00:00Z');
-        const datasetEndDate = new Date('2030-01-01T00:00:00Z');
+content_copy
 
-        // UI Elements
-        const dateRangeContainer = document.getElementById('date-range-buttons');
-        const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
-        const startDatePicker = document.getElementById('start-date-picker');
-        const endDatePicker = document.getElementById('end-date-picker');
-        const redrawButton = document.getElementById('redraw-chart-btn');
+expand_less
+let fullDailyData = [];
+    let fullInterpolatedData30m = []; // 全期間の30分粒度データをキャッシュ
+    let chart;
+    let currentGranularity = '1d';
+    let activeChartType = 'ccu';
+    let currentProcessedData = [];
 
-        function generateDailyData(startDate, endDate) {
-            const data = [];
-            let currentTime = new Date(startDate);
-            let cumulativePositive = 0;
-            let cumulativeNegative = 0;
-            
-            const ccuPoints = [
-                { date: new Date('2026-01-01'), ccu: 10000 },
-                { date: new Date('2027-01-01'), ccu: 8500000 },
-                { date: new Date('2028-01-01'), ccu: 7280000 },
-                { date: new Date('2029-01-01'), ccu: 5460000 },
-                { date: new Date('2030-01-01'), ccu: 4670000 }
-            ];
+    const datasetStartDate = new Date('2025-12-31T00:00:00Z');
+    const datasetEndDate = new Date('2030-01-01T00:00:00Z');
 
-            const ccuTimeline = {};
-            for (let i = 0; i < ccuPoints.length - 1; i++) {
-                const startPoint = ccuPoints[i];
-                const endPoint = ccuPoints[i + 1];
-                let currentDate = new Date(startPoint.date);
-                const totalDays = (endPoint.date.getTime() - startPoint.date.getTime()) / (1000 * 60 * 60 * 24);
-                let dayCount = 0;
-                while (currentDate < endPoint.date) {
-                    const progress = dayCount / totalDays;
-                    let baseCcu;
-                    const startYear = startPoint.date.getFullYear();
-                    if (startYear === 2026) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * (1 - Math.exp(-progress * 5));
-                    else if (startYear === 2027) baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
-                    else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
-                    else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
-                    const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
-                    ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
-                    currentDate.setDate(currentDate.getDate() + 1);
-                    dayCount++;
-                }
-            }
-            while (currentTime <= endDate) {
-                const dateString = currentTime.toISOString().slice(0, 10);
-                let baseCcu = ccuTimeline[dateString] || 10000;
-                if (currentTime.getDay() === 0 || currentTime.getDay() === 6) baseCcu *= 1.4;
-                const ccuPoint = { timestamp: currentTime.getTime(), ccu: Math.floor(baseCcu) };
-                const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu);
-                cumulativePositive += ratingPoint.positive;
-                cumulativeNegative += ratingPoint.negative;
-                const cumulativeTotalRatings = cumulativePositive + cumulativeNegative;
-                const cumulativePositiveRatio = cumulativeTotalRatings > 0 ? (cumulativePositive / cumulativeTotalRatings) * 100 : 0;
-                data.push({ ...ccuPoint, ...ratingPoint, cumulativePositive, cumulativeNegative, ratio: parseFloat(cumulativePositiveRatio.toFixed(2)) });
-                currentTime.setDate(currentTime.getDate() + 1);
-            }
-            return data;
-        }
+    function generateDailyData(startDate, endDate) {
+        const data = [];
+        let currentTime = new Date(startDate);
+        let cumulativePositive = 0;
+        let cumulativeNegative = 0;
         
-        function calculateMovingAverage(data, windowSize = 14) {
-            return data.map((d, i, arr) => {
-                const start = Math.max(0, i - windowSize + 1);
-                const end = i + 1;
-                const windowData = arr.slice(start, end);
-                const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
-                return { ...d, avgCcu: Math.round(sum / windowData.length) };
-            });
-        }
-        
-        function recalculateMovingAverageForInterpolatedData(data, dailyWindowSize = 14) {
-            const windowSize = dailyWindowSize * 48; // 14 days * 48 half-hours/day
-            return data.map((d, i, arr) => {
-                const start = Math.max(0, i - windowSize + 1);
-                const end = i + 1;
-                const windowData = arr.slice(start, end);
-                const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
-                return { ...d, avgCcu: Math.round(sum / windowData.length) };
-            });
-        }
+        const ccuPoints = [
+            { date: new Date('2026-01-01'), ccu: 10000 },
+            { date: new Date('2027-01-01'), ccu: 8500000 },
+            { date: new Date('2028-01-01'), ccu: 7280000 },
+            { date: new Date('2029-01-01'), ccu: 5460000 },
+            { date: new Date('2030-01-01'), ccu: 4670000 }
+        ];
 
-        function createRatingDataPoint(date, ccu) {
-            const isUpdateDay = date.getDate() === 1;
-            let positiveRatingsBoost = isUpdateDay ? 1200000 : 0;
-            let negativeRatingsBoost = isUpdateDay ? 5000 : 0;
-            const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
-            const dailyNegativeBase = ccu * (0.00008 + Math.random() * 0.00004);
-            return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
-        }
-
-        function interpolateData(dailyData) {
-            if (dailyData.length <= 1) return dailyData;
-            const interpolated = [];
-            const intervalMs = 30 * 60 * 1000;
-            for (let i = 0; i < dailyData.length - 1; i++) {
-                const d1 = dailyData[i];
-                const d2 = dailyData[i + 1];
-                const isUpdateDay = new Date(d1.timestamp).getDate() === 1;
-                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000;
-                const intervalsForDay = [];
-                let tempTimestamp = d1.timestamp;
-                while (tempTimestamp < d2.timestamp) {
-                    const ratio = (tempTimestamp - d1.timestamp) / (d2.timestamp - d1.timestamp);
-                    const dayProgress = ((tempTimestamp - d1.timestamp) % (24 * 3600 * 1000)) / (24 * 3600 * 1000);
-                    const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
-                    const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
-                    const randomNoise = (Math.random() - 0.5) * 0.1;
-                    let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
-                    let ccuValue = baseCcuValue;
-                    if (isUpdateDay) {
-                        const timeDiffHours = (tempTimestamp - updatePeakTime) / (3600 * 1000);
-                        const peakMultiplier = 8.0;
-                        let spikeFactor = 1.0;
-                        if (timeDiffHours >= -3 && timeDiffHours <= 8) { 
-                            if (timeDiffHours < 0) spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(1.5 * timeDiffHours);
-                            else spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(-0.8 * timeDiffHours);
-                        }
-                        ccuValue = baseCcuValue * spikeFactor;
-                    }
-                    intervalsForDay.push({ timestamp: tempTimestamp, ccu: Math.max(0, ccuValue) });
-                    tempTimestamp += intervalMs;
-                }
-                const totalCcuForDay = intervalsForDay.reduce((sum, interval) => sum + interval.ccu, 0);
-                let lastKnownPoint = { ...d1 };
-                interpolated.push(lastKnownPoint);
-                for(const interval of intervalsForDay.slice(1)) {
-                    const ccuRatio = totalCcuForDay > 0 ? interval.ccu / totalCcuForDay : 0;
-                    const positiveThisInterval = d1.positive * ccuRatio;
-                    const negativeThisInterval = d1.negative * ccuRatio;
-                    const currentCumulativePositive = lastKnownPoint.cumulativePositive + positiveThisInterval;
-                    const currentCumulativeNegative = lastKnownPoint.cumulativeNegative + negativeThisInterval;
-                    const totalRatings = currentCumulativePositive + currentCumulativeNegative;
-                    const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
-                    const newPoint = {
-                        timestamp: interval.timestamp, ccu: Math.floor(interval.ccu), avgCcu: 0, positive: positiveThisInterval, negative: negativeThisInterval,
-                        cumulativePositive: currentCumulativePositive, cumulativeNegative: currentCumulativeNegative, ratio: parseFloat(currentRatio.toFixed(2)),
-                    };
-                    interpolated.push(newPoint);
-                    lastKnownPoint = { ...newPoint };
-                }
+        const ccuTimeline = {};
+        for (let i = 0; i < ccuPoints.length - 1; i++) {
+            const startPoint = ccuPoints[i];
+            const endPoint = ccuPoints[i + 1];
+            let currentDate = new Date(startPoint.date);
+            const totalDays = (endPoint.date.getTime() - startPoint.date.getTime()) / (1000 * 60 * 60 * 24);
+            let dayCount = 0;
+            while (currentDate < endPoint.date) {
+                const progress = dayCount / totalDays;
+                let baseCcu;
+                const startYear = startPoint.date.getFullYear();
+                if (startYear === 2026) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * (1 - Math.exp(-progress * 5));
+                else if (startYear === 2027) baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
+                else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
+                else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
+                const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
+                ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
+                currentDate.setDate(currentDate.getDate() + 1);
+                dayCount++;
             }
-            if (dailyData.length > 0) {
-                 const lastData = dailyData[dailyData.length-1];
-                 const existingLast = interpolated.find(p => p.timestamp === lastData.timestamp);
-                 if(!existingLast) interpolated.push(lastData);
-            }
-            return interpolated.map(p => ({
-                ...p, positive: Math.round(p.positive), negative: Math.round(p.negative),
-                cumulativePositive: Math.round(p.cumulativePositive), cumulativeNegative: Math.round(p.cumulativeNegative)
-            }));
         }
-
-        function calculatePercentageChange(data) {
-            const initialNulls = { ccuChange: null, avgCcuChange: null, cumulativePositiveChange: null, cumulativeNegativeChange: null, ratioChange: null };
-            if (data.length <= 1) return data.map(d => ({ ...d, ...initialNulls }));
-            return data.map((d, index) => {
-                if (index === 0) return { ...d, ...initialNulls };
-                const prevD = data[index - 1];
-                const getValue = (val) => (val === null || val === undefined) ? 0 : val;
-                const ccuChange = getValue(prevD.ccu) === 0 ? null : ((getValue(d.ccu) - getValue(prevD.ccu)) / getValue(prevD.ccu)) * 100;
-                const avgCcuChange = getValue(prevD.avgCcu) === 0 ? null : ((getValue(d.avgCcu) - getValue(prevD.avgCcu)) / getValue(prevD.avgCcu)) * 100;
-                const cumulativePositiveChange = getValue(prevD.cumulativePositive) === 0 ? null : ((getValue(d.cumulativePositive) - getValue(prevD.cumulativePositive)) / getValue(prevD.cumulativePositive)) * 100;
-                const cumulativeNegativeChange = getValue(prevD.cumulativeNegative) === 0 ? null : ((getValue(d.cumulativeNegative) - getValue(prevD.cumulativeNegative)) / getValue(prevD.cumulativeNegative)) * 100;
-                const ratioChange = getValue(prevD.ratio) === 0 ? null : ((getValue(d.ratio) - getValue(prevD.ratio)) / getValue(prevD.ratio)) * 100;
-                return { ...d, ccuChange, avgCcuChange, cumulativePositiveChange, cumulativeNegativeChange, ratioChange };
-            });
+        while (currentTime <= endDate) {
+            const dateString = currentTime.toISOString().slice(0, 10);
+            let baseCcu = ccuTimeline[dateString] || 10000;
+            if (currentTime.getDay() === 0 || currentTime.getDay() === 6) baseCcu *= 1.4;
+            const ccuPoint = { timestamp: currentTime.getTime(), ccu: Math.floor(baseCcu) };
+            const ratingPoint = createRatingDataPoint(currentTime, ccuPoint.ccu);
+            cumulativePositive += ratingPoint.positive;
+            cumulativeNegative += ratingPoint.negative;
+            const cumulativeTotalRatings = cumulativePositive + cumulativeNegative;
+            const cumulativePositiveRatio = cumulativeTotalRatings > 0 ? (cumulativePositive / cumulativeTotalRatings) * 100 : 0;
+            data.push({ ...ccuPoint, ...ratingPoint, cumulativePositive, cumulativeNegative, ratio: parseFloat(cumulativePositiveRatio.toFixed(2)) });
+            currentTime.setDate(currentTime.getDate() + 1);
         }
-        
-        function updateMainChart(data) {
-            const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
-            const tooltipTheme = isLightMode ? 'light' : 'dark';
-            const labelColor = isLightMode ? '#333' : '#fff';
-
-            let series, yaxis, colors, title, stroke, chartType;
-            const yAxisFormatter = val => {
-                if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-                if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-                return val !== null && val !== undefined ? Math.round(val) : '0';
-            };
-
-            switch(activeChartType) {
-                case 'ccu': chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
-                case 'cumulative-ratings': chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter }, stacked: false }; break;
-                case 'ratio': chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 }; yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
-            }
-
-            const options = {
-                series: series,
-                chart: { type: chartType, background: isLightMode ? '#ffffff' : '#2d3748' },
-                colors: colors, stroke: stroke, title: { text: title, style: { color: labelColor } },
-                xaxis: { labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd' : 'MM/dd HH:mm' } },
-                yaxis: yaxis, legend: { labels: { colors: labelColor } },
-                tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
-            };
-            
-            if (chart) chart.updateOptions(options, true, true);
-        }
-
-        function initializeCharts() {
-            const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
-            const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
-            const labelColor = isLightMode ? '#333' : '#fff';
-
-            const mainChartOptions = {
-                series: [],
-                chart: { id: 'main-chart', height: 400, type: 'line', toolbar: { autoSelected: 'zoom' }, background: 'transparent', fontFamily: 'Roboto, sans-serif' },
-                dataLabels: { enabled: false }, legend: { position: 'top', horizontalAlign: 'right' }, grid: { borderColor: gridBorderColor },
-                xaxis: { type: 'datetime', labels: { datetimeUTC: false, style: { colors: labelColor } }, tooltip: { enabled: true } },
-            };
-
-            const brushChartOptions = {
-                series: [{ name: 'CCU', data: fullDailyData.map(d => [d.timestamp, d.ccu]) }],
-                chart: {
-                    id: 'brush-chart', height: 130, type: 'area', background: 'transparent', fontFamily: 'Roboto, sans-serif',
-                    brush: { target: 'main-chart', enabled: true },
-                    selection: { enabled: true },
-                    events: {
-                        selection: function(chartContext, { xaxis, yaxis }) {
-                            if (isBrushUpdating) return;
-                            const newStartDate = new Date(xaxis.min);
-                            const newEndDate = new Date(xaxis.max);
-                            startDatePicker.valueAsDate = newStartDate;
-                            endDatePicker.valueAsDate = newEndDate;
-                            processAndDisplayData(newStartDate, newEndDate);
-                            updateActiveButton(dateRangeButtons, 'custom');
-                        }
-                    }
-                },
-                colors: ['#008FFB'], grid: { borderColor: gridBorderColor },
-                xaxis: { type: 'datetime', tooltip: { enabled: true }, labels: { datetimeUTC: false, style: { colors: labelColor } } },
-                yaxis: { tickAmount: 2, labels: { style: { colors: labelColor }, formatter: val => val >= 1000 ? (val / 1000) + 'K' : Math.round(val) } }
-            };
-
-            chart = new ApexCharts(document.querySelector("#apex-chart"), mainChartOptions);
-            chart.render();
-            brushChart = new ApexCharts(document.querySelector("#apex-brush-chart"), brushChartOptions);
-            brushChart.render();
-        }
-
-        function processAndDisplayData(startDate, endDate) {
-            startDate.setUTCHours(0, 0, 0, 0);
-            endDate.setUTCHours(23, 59, 59, 999);
-            let processedData;
-            if (currentGranularity === '1d') {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                processedData = fullDailyData.filter(d => d.timestamp >= start.getTime() && d.timestamp <= end.getTime());
-            } else {
-                const startTimestamp = startDate.getTime();
-                const endTimestamp = endDate.getTime();
-                let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
-                processedData = (currentGranularity === '1h') ? filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0) : filteredInterpolatedData;
-            }
-            currentProcessedData = calculatePercentageChange(processedData);
-            updateMainChart(currentProcessedData);
-            renderTable(currentProcessedData);
-            updateCounters(currentProcessedData);
-        }
-
-        function updateUI() {
-            const startDate = new Date(startDatePicker.value);
-            const endDate = new Date(endDatePicker.value);
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
-            
-            processAndDisplayData(startDate, endDate);
-            
-            isBrushUpdating = true;
-            brushChart.updateOptions({
-                chart: { selection: { xaxis: { min: startDate.getTime(), max: endDate.getTime() } } }
-            }, false, false).then(() => { isBrushUpdating = false; });
-        }
-
-        function renderTable(data) {
-            const tableBody = document.getElementById('data-table-body');
-            tableBody.innerHTML = '';
-            if (!data || data.length === 0) { tableBody.innerHTML = `<tr><td colspan="11" class="p-3 text-center text-gray-500">表示するデータがありません。</td></tr>`; return; }
-            const reversedData = [...data].reverse();
-            reversedData.forEach((d, index) => {
-                const row = document.createElement('tr');
-                row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
-                const date = new Date(d.timestamp);
-                let dateString = (currentGranularity === '1d')
-                    ? date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
-                    : date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-                const formatChange = (change) => {
-                    if (change === null || !isFinite(change)) return '-';
-                    const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
-                    const arrow = change >= 0 ? '▲' : '▼';
-                    return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
-                };
-                row.innerHTML = `<td class="p-3 text-sm">${dateString}</td>
-                    <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
-                    <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
-                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>`;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function updateCounters(data) {
-            const counters = { 'ccu-counter': '0', 'avg-ccu-counter': '0', 'positive-counter': '0', 'negative-counter': '0', 'positive-ratio-counter': '0%', 'peak-ccu-counter': '0' };
-            if (data && data.length > 0) {
-                const latestData = data[data.length - 1];
-                counters['ccu-counter'] = (latestData.ccu || 0).toLocaleString();
-                counters['avg-ccu-counter'] = (latestData.avgCcu || 0).toLocaleString();
-                counters['positive-counter'] = (latestData.cumulativePositive || 0).toLocaleString();
-                counters['negative-counter'] = (latestData.cumulativeNegative || 0).toLocaleString();
-                counters['positive-ratio-counter'] = `${(latestData.ratio || 0).toFixed(2)}%`;
-                counters['peak-ccu-counter'] = data.reduce((max, current) => Math.max(max, current.ccu), 0).toLocaleString();
-            }
-            for (const id in counters) { document.getElementById(id).textContent = counters[id]; }
-        }
-
-        function updateActiveButton(buttons, activeIdentifier) {
-            buttons.forEach(btn => {
-                const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
-                if (btnIdentifier === activeIdentifier) { btn.classList.add('active-btn'); btn.classList.remove('inactive-btn'); } 
-                else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
-            });
-        }
-        
-        document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
-            activeChartType = button.dataset.chart;
-            updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
-            updateUI();
-        }));
-        
-        document.querySelectorAll('.granularity-btn').forEach(button => button.addEventListener('click', () => {
-            currentGranularity = button.dataset.granularity;
-            updateActiveButton(document.querySelectorAll('.granularity-btn'), currentGranularity);
-            updateUI();
-        }));
-
-        dateRangeContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (!button) return;
-            const days = button.dataset.days;
-            startDatePicker.disabled = days !== 'custom';
-            endDatePicker.disabled = days !== 'custom';
-            if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
-            let startDate, endDate = new Date(datasetEndDate);
-            if (days === 'all') startDate = new Date(datasetStartDate);
-            else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
-            startDatePicker.valueAsDate = startDate;
-            endDatePicker.valueAsDate = endDate;
-            updateActiveButton(dateRangeButtons, days);
-            updateUI();
+        return data;
+    }
+    
+    function calculateMovingAverage(data, windowSize = 14) {
+        return data.map((d, i, arr) => {
+            const start = Math.max(0, i - windowSize + 1);
+            const end = i + 1;
+            const windowData = arr.slice(start, end);
+            const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
+            return { ...d, avgCcu: Math.round(sum / windowData.length) };
         });
+    }
+    
+    function recalculateMovingAverageForInterpolatedData(data, dailyWindowSize = 14) {
+        const windowSize = dailyWindowSize * 48; // 14 days * 48 half-hours/day
+        return data.map((d, i, arr) => {
+            const start = Math.max(0, i - windowSize + 1);
+            const end = i + 1;
+            const windowData = arr.slice(start, end);
+            const sum = windowData.reduce((acc, curr) => acc + curr.ccu, 0);
+            return { ...d, avgCcu: Math.round(sum / windowData.length) };
+        });
+    }
 
-        startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        redrawButton.addEventListener('click', updateUI);
+    function createRatingDataPoint(date, ccu) {
+        const isUpdateDay = date.getDate() === 1;
+        // Target: ~100M positive, ~1M negative over ~4 years (1460 days)
+        let positiveRatingsBoost = isUpdateDay ? 1200000 : 0;
+        let negativeRatingsBoost = isUpdateDay ? 5000 : 0;
+        const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
+        const dailyNegativeBase = ccu * (0.00008 + Math.random() * 0.00004);
+        return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
+    }
 
-        // --- データ生成と初期化 ---
-        const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
-        fullDailyData = calculateMovingAverage(dailyData);
-        let interpolatedData = interpolateData(fullDailyData);
-        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
+    function filterDataByDateRange(allData, startDate, endDate) {
+        const startTimestamp = startDate.getTime();
+        const endTimestamp = endDate.getTime();
+        return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+    }
+
+    function interpolateData(dailyData) {
+        if (dailyData.length <= 1) return dailyData;
         
-        initializeCharts();
+        const interpolated = [];
+        const intervalMs = 30 * 60 * 1000;
+
+        for (let i = 0; i < dailyData.length - 1; i++) {
+            const d1 = dailyData[i];
+            const d2 = dailyData[i + 1];
+
+            const isUpdateDay = new Date(d1.timestamp).getDate() === 1;
+            const updatePeakTime = d1.timestamp + 9 * 3600 * 1000; // UTC 09:00 (JST 18:00)
+
+            const intervalsForDay = [];
+            let tempTimestamp = d1.timestamp;
+            while (tempTimestamp < d2.timestamp) {
+                const ratio = (tempTimestamp - d1.timestamp) / (d2.timestamp - d1.timestamp);
+                const dayProgress = ((tempTimestamp - d1.timestamp) % (24 * 3600 * 1000)) / (24 * 3600 * 1000);
+                const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
+                const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
+                const randomNoise = (Math.random() - 0.5) * 0.1;
+                let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
+                let ccuValue = baseCcuValue;
+
+                if (isUpdateDay) {
+                    const timeDiffHours = (tempTimestamp - updatePeakTime) / (3600 * 1000);
+                    const peakMultiplier = 8.0;
+                    let spikeFactor = 1.0;
+                    if (timeDiffHours >= -3 && timeDiffHours <= 8) { 
+                        if (timeDiffHours < 0) spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(1.5 * timeDiffHours);
+                        else spikeFactor = 1 + (peakMultiplier - 1) * Math.exp(-0.8 * timeDiffHours);
+                    }
+                    ccuValue = baseCcuValue * spikeFactor;
+                }
+                intervalsForDay.push({ timestamp: tempTimestamp, ccu: Math.max(0, ccuValue) });
+                tempTimestamp += intervalMs;
+            }
+            
+            const totalCcuForDay = intervalsForDay.reduce((sum, interval) => sum + interval.ccu, 0);
+
+            let lastKnownPoint = { ...d1 };
+            interpolated.push(lastKnownPoint);
+
+            for(const interval of intervalsForDay.slice(1)) {
+                const ccuRatio = totalCcuForDay > 0 ? interval.ccu / totalCcuForDay : 0;
+                const positiveThisInterval = d1.positive * ccuRatio;
+                const negativeThisInterval = d1.negative * ccuRatio;
+                
+                const currentCumulativePositive = lastKnownPoint.cumulativePositive + positiveThisInterval;
+                const currentCumulativeNegative = lastKnownPoint.cumulativeNegative + negativeThisInterval;
+                const totalRatings = currentCumulativePositive + currentCumulativeNegative;
+                const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
+
+                const newPoint = {
+                    timestamp: interval.timestamp,
+                    ccu: Math.floor(interval.ccu),
+                    avgCcu: 0,
+                    positive: positiveThisInterval,
+                    negative: negativeThisInterval,
+                    cumulativePositive: currentCumulativePositive,
+                    cumulativeNegative: currentCumulativeNegative,
+                    ratio: parseFloat(currentRatio.toFixed(2)),
+                };
+                interpolated.push(newPoint);
+                lastKnownPoint = { ...newPoint };
+            }
+        }
+        if (dailyData.length > 0) {
+             const lastData = dailyData[dailyData.length-1];
+             const existingLast = interpolated.find(p => p.timestamp === lastData.timestamp);
+             if(!existingLast) {
+                interpolated.push(lastData);
+             }
+        }
         
-        document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
-        document.querySelector('[data-days="all"]').click();
+        return interpolated.map(p => ({
+            ...p,
+            positive: Math.round(p.positive),
+            negative: Math.round(p.negative),
+            cumulativePositive: Math.round(p.cumulativePositive),
+            cumulativeNegative: Math.round(p.cumulativeNegative)
+        }));
+    }
+
+    function calculatePercentageChange(data) {
+        const initialNulls = { ccuChange: null, avgCcuChange: null, cumulativePositiveChange: null, cumulativeNegativeChange: null, ratioChange: null };
+        if (data.length <= 1) return data.map(d => ({ ...d, ...initialNulls }));
+        return data.map((d, index) => {
+            if (index === 0) return { ...d, ...initialNulls };
+            const prevD = data[index - 1];
+            const getValue = (val) => (val === null || val === undefined) ? 0 : val;
+            const ccuChange = getValue(prevD.ccu) === 0 ? null : ((getValue(d.ccu) - getValue(prevD.ccu)) / getValue(prevD.ccu)) * 100;
+            const avgCcuChange = getValue(prevD.avgCcu) === 0 ? null : ((getValue(d.avgCcu) - getValue(prevD.avgCcu)) / getValue(prevD.avgCcu)) * 100;
+            const cumulativePositiveChange = getValue(prevD.cumulativePositive) === 0 ? null : ((getValue(d.cumulativePositive) - getValue(prevD.cumulativePositive)) / getValue(prevD.cumulativePositive)) * 100;
+            const cumulativeNegativeChange = getValue(prevD.cumulativeNegative) === 0 ? null : ((getValue(d.cumulativeNegative) - getValue(prevD.cumulativeNegative)) / getValue(prevD.cumulativeNegative)) * 100;
+            const ratioChange = getValue(prevD.ratio) === 0 ? null : ((getValue(d.ratio) - getValue(prevD.ratio)) / getValue(prevD.ratio)) * 100;
+            return { ...d, ccuChange, avgCcuChange, cumulativePositiveChange, cumulativeNegativeChange, ratioChange };
+        });
+    }
+
+    function renderChart(data) {
+        const chartContainer = document.querySelector("#apex-chart");
+        
+        if (!data || data.length === 0) {
+            if (chart) chart.updateSeries([]);
+            chartContainer.innerHTML = "";
+            return;
+        }
+        
+        const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const tooltipTheme = isLightMode ? 'light' : 'dark';
+        const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
+        const labelColor = isLightMode ? '#333' : '#fff';
+
+        let series, yaxis, colors, title, stroke, chartType;
+        
+        const yAxisFormatter = function(val) {
+            if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return val !== null && val !== undefined ? Math.round(val) : '0';
+        };
+
+        switch(activeChartType) {
+            case 'ccu': chartType = 'line'; series = [ { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }, { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) } ]; colors = ['#008FFB', '#00E396']; title = 'CCUと14日間平均CCU'; stroke = { curve: 'smooth', width: [2.5, 2] }; yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } }; break;
+            case 'cumulative-ratings': chartType = 'line'; series = [ { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }, { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) } ]; colors = ['#00E396', '#FF4560']; title = '合計評価数'; stroke = { curve: 'smooth', width: 2 }; yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter }, stacked: false }; break;
+            case 'ratio': chartType = 'line'; series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }]; colors = ['#FBBF24']; title = '累積高評価率'; stroke = { curve: 'smooth', width: 2.5 }; yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } }; break;
+        }
+
+        const options = {
+            series: series,
+            chart: { id: 'sample-game-chart', type: chartType, height: 400, toolbar: { show: true, autoSelected: 'zoom' }, background: isLightMode ? '#ffffff' : '#2d3748', fontFamily: 'Roboto, sans-serif' },
+            colors: colors,
+            stroke: stroke,
+            title: { text: title, align: 'left', style: { color: labelColor } },
+            xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd HH:mm' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
+            yaxis: yaxis,
+            tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
+            dataLabels: { enabled: false },
+            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: labelColor } },
+            grid: { borderColor: gridBorderColor },
+        };
+        
+        if (chart) chart.updateOptions(options);
+        else { chart = new ApexCharts(chartContainer, options); chart.render(); }
+    }
+
+    function renderTable(data) {
+        const tableBody = document.getElementById('data-table-body');
+        tableBody.innerHTML = '';
+        if (!data || data.length === 0) { tableBody.innerHTML = `<tr><td colspan="11" class="p-3 text-center text-gray-500">表示するデータがありません。</td></tr>`; return; }
+        const reversedData = [...data].reverse();
+        reversedData.forEach((d, index) => {
+            const row = document.createElement('tr');
+            row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
+            const date = new Date(d.timestamp);
+            let dateString;
+             if (currentGranularity === '1d') {
+                dateString = date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            } else {
+                dateString = date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            }
+
+            const formatChange = (change) => {
+                if (change === null || !isFinite(change)) return '-';
+                const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
+                const arrow = change >= 0 ? '▲' : '▼';
+                return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+            };
+            row.innerHTML = `
+                <td class="p-3 text-sm">${dateString}</td>
+                <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
+                <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
+                <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
+                <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
+                <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function updateCounters(data) {
+        const counters = { 'ccu-counter': '0', 'avg-ccu-counter': '0', 'positive-counter': '0', 'negative-counter': '0', 'positive-ratio-counter': '0%', 'peak-ccu-counter': '0' };
+        if (data && data.length > 0) {
+            const latestData = data[data.length - 1];
+            counters['ccu-counter'] = (latestData.ccu || 0).toLocaleString();
+            counters['avg-ccu-counter'] = (latestData.avgCcu || 0).toLocaleString();
+            counters['positive-counter'] = (latestData.cumulativePositive || 0).toLocaleString();
+            counters['negative-counter'] = (latestData.cumulativeNegative || 0).toLocaleString();
+            counters['positive-ratio-counter'] = `${(latestData.ratio || 0).toFixed(2)}%`;
+            counters['peak-ccu-counter'] = data.reduce((max, current) => Math.max(max, current.ccu), 0).toLocaleString();
+        }
+        for (const id in counters) { document.getElementById(id).textContent = counters[id]; }
+    }
+
+    function updateUI() {
+        const startDate = new Date(document.getElementById('start-date-picker').value);
+        const endDate = new Date(document.getElementById('end-date-picker').value);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+        startDate.setUTCHours(0, 0, 0, 0);
+        endDate.setUTCHours(23, 59, 59, 999);
+        
+        let processedData;
+        if (currentGranularity === '1d') {
+            processedData = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dayStart = new Date(d);
+                dayStart.setUTCHours(0, 0, 0, 0);
+                const dayEnd = new Date(d);
+                dayEnd.setUTCHours(23, 59, 59, 999);
+
+                const dataForDay = fullInterpolatedData30m.filter(
+                    p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime()
+                );
+                if (dataForDay.length === 0) continue;
+
+                let representativePoint = dataForDay.find(p => {
+                    const pointDate = new Date(p.timestamp);
+                    return pointDate.getUTCHours() === 9 && pointDate.getUTCMinutes() === 0;
+                });
+                if (!representativePoint) {
+                    representativePoint = dataForDay[dataForDay.length - 1];
+                }
+                
+                processedData.push({
+                    timestamp: representativePoint.timestamp,
+                    ccu: representativePoint.ccu,
+                    avgCcu: representativePoint.avgCcu,
+                    cumulativePositive: representativePoint.cumulativePositive,
+                    cumulativeNegative: representativePoint.cumulativeNegative,
+                    ratio: representativePoint.ratio,
+                });
+            }
+        } else {
+            const startTimestamp = startDate.getTime();
+            const endTimestamp = endDate.getTime();
+            let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+
+            if (currentGranularity === '1h') {
+                processedData = filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0);
+            } else { // 30m
+                processedData = filteredInterpolatedData;
+            }
+        }
+
+        currentProcessedData = calculatePercentageChange(processedData);
+        renderChart(currentProcessedData);
+        renderTable(currentProcessedData);
+        updateCounters(currentProcessedData);
+    }
+
+    function updateActiveButton(buttons, activeIdentifier) {
+        buttons.forEach(btn => {
+            const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
+            if (btnIdentifier === activeIdentifier) { btn.classList.add('active-btn'); btn.classList.remove('inactive-btn'); } 
+            else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
+        });
+    }
+    
+    document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
+        if (button.disabled) return;
+        activeChartType = button.dataset.chart;
+        updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
+        updateUI();
+    }));
+    
+    document.querySelectorAll('.granularity-btn').forEach(button => button.addEventListener('click', () => {
+        currentGranularity = button.dataset.granularity;
+        updateActiveButton(document.querySelectorAll('.granularity-btn'), currentGranularity);
+        updateUI();
+    }));
+
+    const dateRangeContainer = document.getElementById('date-range-buttons');
+    const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
+    const startDatePicker = document.getElementById('start-date-picker');
+    const endDatePicker = document.getElementById('end-date-picker');
+    const redrawButton = document.getElementById('redraw-chart-btn');
+
+    dateRangeContainer.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
+        const days = button.dataset.days;
+        startDatePicker.disabled = days !== 'custom';
+        endDatePicker.disabled = days !== 'custom';
+        if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
+        let startDate, endDate = new Date(datasetEndDate);
+        if (days === 'all') startDate = new Date(datasetStartDate);
+        else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
+        startDatePicker.valueAsDate = startDate;
+        endDatePicker.valueAsDate = endDate;
+        updateActiveButton(dateRangeButtons, days);
+        updateUI();
     });
+
+    startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+    endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
+    redrawButton.addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
+
+    // --- データ生成と初期化 ---
+    const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
+    fullDailyData = calculateMovingAverage(dailyData);
+    
+    let interpolatedData = interpolateData(fullDailyData);
+    fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
+
+    document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
+    document.querySelector('[data-days="all"]').click();
+});
 </script>
 </body>
 </html>
