@@ -365,7 +365,7 @@
             return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
         }
 
-        function interpolateData(dailyData, granularity) {
+        function interpolateData(dailyData) {
             if (dailyData.length <= 1) return dailyData;
             
             const interpolated = [];
@@ -494,7 +494,7 @@
                 colors: colors,
                 stroke: stroke,
                 title: { text: title, align: 'left', style: { color: labelColor } },
-                xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
+                xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd HH:mm' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
                 yaxis: yaxis,
                 tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '日次高評価数': change = dataPoint.positiveChange; break; case '日次低評価数': change = dataPoint.negativeChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
                 dataLabels: { enabled: false },
@@ -517,6 +517,13 @@
                 row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
                 const date = new Date(d.timestamp);
                 let dateString = currentGranularity === '1d' ? date.toLocaleDateString() : date.toLocaleString();
+                 if (currentGranularity === '1d') {
+                    // 1日粒度の場合、日付のみ表示
+                    dateString = date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                } else {
+                    dateString = date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                }
+
                 const formatChange = (change) => {
                     if (change === null || !isFinite(change)) return '-';
                     const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
@@ -555,21 +562,52 @@
             const startDate = new Date(document.getElementById('start-date-picker').value);
             const endDate = new Date(document.getElementById('end-date-picker').value);
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
-            startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
+            startDate.setUTCHours(0, 0, 0, 0);
+            endDate.setUTCHours(23, 59, 59, 999);
             
             let processedData;
             if (currentGranularity === '1d') {
-                const filteredDailyData = filterDataByDateRange(fullDailyData, startDate, endDate);
-                processedData = filteredDailyData.map(d => {
-                    const date = new Date(d.timestamp);
-                    const jst1800Timestamp = d.timestamp + 9 * 3600 * 1000;
-                    if (date.getDate() === 1) { // アップデート日
-                        const peakCcu = Math.floor(d.ccu * 8); 
-                        return { ...d, ccu: peakCcu, timestamp: jst1800Timestamp };
+                processedData = [];
+                // 期間内の各日についてループ
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dayStart = new Date(d);
+                    dayStart.setUTCHours(0, 0, 0, 0);
+                    const dayEnd = new Date(d);
+                    dayEnd.setUTCHours(23, 59, 59, 999);
+
+                    // その日1日分の詳細データを取得
+                    const dataForDay = fullInterpolatedData30m.filter(
+                        p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime()
+                    );
+
+                    if (dataForDay.length === 0) continue;
+
+                    // JST 18:00 (UTC 09:00) のデータポイントを探す
+                    let representativePoint = dataForDay.find(p => {
+                        const pointDate = new Date(p.timestamp);
+                        return pointDate.getUTCHours() === 9 && pointDate.getUTCMinutes() === 0;
+                    });
+                    
+                    // もし見つからなかった場合（データ期間の端など）、その日の最後のデータを代表とする
+                    if (!representativePoint) {
+                        representativePoint = dataForDay[dataForDay.length - 1];
                     }
-                    return { ...d, timestamp: jst1800Timestamp };
-                });
+
+                    // 日次評価数をその日1日分で合計する
+                    const dailyPositiveSum = dataForDay.reduce((sum, p) => sum + p.positive, 0);
+                    const dailyNegativeSum = dataForDay.reduce((sum, p) => sum + p.negative, 0);
+                    
+                    processedData.push({
+                        timestamp: representativePoint.timestamp, // 実際の JST 18:00 のタイムスタンプ
+                        ccu: representativePoint.ccu,
+                        avgCcu: representativePoint.avgCcu,
+                        cumulativePositive: representativePoint.cumulativePositive,
+                        cumulativeNegative: representativePoint.cumulativeNegative,
+                        ratio: representativePoint.ratio,
+                        positive: dailyPositiveSum, // 1日分の合計
+                        negative: dailyNegativeSum, // 1日分の合計
+                    });
+                }
             } else {
                 const startTimestamp = startDate.getTime();
                 const endTimestamp = endDate.getTime();
@@ -648,8 +686,7 @@
 
         // --- データ生成と初期化 ---
         const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
-        const dailyDataWithAvgCcu = calculateMovingAverage(dailyData);
-        fullDailyData = dailyDataWithAvgCcu;
+        fullDailyData = calculateMovingAverage(dailyData);
         
         let interpolatedData = interpolateData(fullDailyData);
         fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
