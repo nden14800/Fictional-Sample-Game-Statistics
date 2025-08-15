@@ -131,7 +131,6 @@
         <p class="text-gray-400 mt-2">この統計はシミュレーションに基づく架空のデータであり、実際のものではありません。</p>
     </header>
 
-    <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
     <!-- Game Info Section -->
     <div class="card p-6 rounded-xl shadow-lg mb-8">
         <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 mb-4">
@@ -157,7 +156,6 @@
         </div>
         <p class="text-gray-400 mt-4 text-sm">※このゲームおよび関連データはすべて架空のものです。</p>
     </div>
-    <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
 
 
     <!-- Counters section -->
@@ -307,9 +305,7 @@
 <!-- Highcharts JS Libraries -->
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
-<!-- ▼▼▼ JavaScriptライブラリ変更点 ▼▼▼ -->
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
-<!-- ▲▲▲ JavaScriptライブラリ変更点 ▲▲▲ -->
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -619,14 +615,18 @@
                     break;
             }
             
-            // ▼▼▼ JavaScript変更点 ▼▼▼
+            // ▼▼▼ JavaScript修正点 ▼▼▼
+            // スタイルが上書きされないように、themeの設定と各オプションをマージします
             const options = {
                 ...theme,
                 chart: {
                     ...theme.chart,
                     zoomType: 'x'
                 },
-                title: { text: title },
+                title: {
+                    ...theme.title, // themeからスタイルを継承
+                    text: title      // textプロパティを追加
+                },
                 plotOptions: {
                     series: {
                         marker: {
@@ -635,8 +635,22 @@
                     }
                 },
                 series: series,
-                xAxis: { type: 'datetime' },
-                yAxis: yAxisOptions,
+                xAxis: {
+                    ...theme.xAxis,    // themeからスタイルを継承
+                    type: 'datetime' // typeプロパティを追加
+                },
+                yAxis: {
+                    ...theme.yAxis, // themeの基本設定（グリッド線など）を継承
+                    // ネストされたオブジェクトは深くマージする必要がある
+                    title: {
+                        ...theme.yAxis.title,        // themeのタイトルのスタイルを継承
+                        ...yAxisOptions.title        // yAxisOptionsのタイトルの設定(text)をマージ
+                    },
+                    labels: {
+                        ...theme.yAxis.labels,       // themeのラベルのスタイルを継承
+                        ...yAxisOptions.labels       // yAxisOptionsのラベルの設定(formatter)をマージ
+                    }
+                },
                 tooltip: {
                     shared: true,
                     useHTML: true,
@@ -655,7 +669,7 @@
                 },
                 credits: { enabled: false }
             };
-            // ▲▲▲ JavaScript変更点 ▲▲▲
+            // ▲▲▲ JavaScript修正点 ▲▲▲
 
             chart = Highcharts.chart(chartContainer, options);
         }
