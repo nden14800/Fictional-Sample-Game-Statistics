@@ -256,7 +256,9 @@
             <table class="w-full text-left table-auto">
                 <thead class="sticky top-0 z-10">
                     <tr class="table-header">
-                        <th class="p-3 font-semibold text-sm rounded-tl-lg">日付</th>
+                        <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
+                        <th class="p-3 font-semibold text-sm rounded-tl-lg">日付 (UTC)</th>
+                        <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
                         <th class="p-3 font-semibold text-sm">CCU</th>
                         <th class="p-3 font-semibold text-sm">CCU (%)</th>
                         <th class="p-3 font-semibold text-sm">平均CCU</th>
@@ -275,13 +277,20 @@
         </div>
     </div>
 </div>
-<!-- ▼▼▼ HTML変更点 ▼▼▼ -->
 <!-- Highcharts JS Libraries -->
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
-<!-- ▲▲▲ HTML変更点 ▲▲▲ -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+
+        // ▼▼▼ JavaScript変更点 ▼▼▼
+        // Highchartsの時刻をグローバルにUTCに設定
+        Highcharts.setOptions({
+            time: {
+                useUTC: true
+            }
+        });
+        // ▲▲▲ JavaScript変更点 ▲▲▲
 
         let fullDailyData = [];
         let fullInterpolatedData30m = [];
@@ -480,7 +489,6 @@
             });
         }
 
-        // ▼▼▼ JavaScript変更点 (renderChart関数) ▼▼▼
         function renderChart(data) {
             const chartContainer = document.getElementById("highcharts-container");
             if (chart) {
@@ -523,6 +531,19 @@
                 return '';
             };
 
+            // ▼▼▼ JavaScript変更点 ▼▼▼
+            const baseTooltipFormatter = (point, y, seriesName, change) => {
+                const val = y.toLocaleString();
+                const changeText = getChangeText(change);
+                return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${val} ${changeText}`;
+            };
+            const ratioTooltipFormatter = (point, y, seriesName, change) => {
+                const val = y.toFixed(2) + '%';
+                const changeText = getChangeText(change);
+                return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${val} ${changeText}`;
+            };
+            // ▲▲▲ JavaScript変更点 ▲▲▲
+
             switch (activeChartType) {
                 case 'ccu':
                     series = [{ name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]), color: '#008FFB' }];
@@ -530,9 +551,7 @@
                     yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
                     tooltipFormatter = function() {
                         const pointData = currentProcessedData[this.points[0].point.index];
-                        const val = this.y.toLocaleString();
-                        const changeText = getChangeText(pointData.ccuChange);
-                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.ccuChange);
                     };
                     break;
                 case 'avg-ccu':
@@ -541,9 +560,7 @@
                     yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
                     tooltipFormatter = function() {
                         const pointData = currentProcessedData[this.points[0].point.index];
-                        const val = this.y.toLocaleString();
-                        const changeText = getChangeText(pointData.avgCcuChange);
-                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.avgCcuChange);
                     };
                     break;
                 case 'cumulative-positive':
@@ -552,9 +569,7 @@
                     yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
                     tooltipFormatter = function() {
                         const pointData = currentProcessedData[this.points[0].point.index];
-                        const val = this.y.toLocaleString();
-                        const changeText = getChangeText(pointData.cumulativePositiveChange);
-                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.cumulativePositiveChange);
                     };
                     break;
                 case 'cumulative-negative':
@@ -563,9 +578,7 @@
                     yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
                     tooltipFormatter = function() {
                         const pointData = currentProcessedData[this.points[0].point.index];
-                        const val = this.y.toLocaleString();
-                        const changeText = getChangeText(pointData.cumulativeNegativeChange);
-                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.cumulativeNegativeChange);
                     };
                     break;
                 case 'ratio':
@@ -574,9 +587,7 @@
                     yAxisOptions = { title: { text: '高評価率 (%)' }, labels: { format: '{value:.1f}%' } };
                      tooltipFormatter = function() {
                         const pointData = currentProcessedData[this.points[0].point.index];
-                        const val = this.y.toFixed(2) + '%';
-                        const changeText = getChangeText(pointData.ratioChange);
-                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                        return ratioTooltipFormatter(this.points[0], this.y, this.series.name, pointData.ratioChange);
                     };
                     break;
             }
@@ -585,13 +596,13 @@
                 ...theme,
                 chart: {
                     ...theme.chart,
-                    zoomType: 'x' // ズーム機能を追加
+                    zoomType: 'x'
                 },
                 title: { text: title },
                 plotOptions: {
                     series: {
                         marker: {
-                            enabled: false // マーカーを無効化
+                            enabled: false
                         }
                     }
                 },
@@ -608,7 +619,6 @@
 
             chart = Highcharts.chart(chartContainer, options);
         }
-        // ▲▲▲ JavaScript変更点 (renderChart関数) ▲▲▲
 
         function renderTable(data) {
             const tableBody = document.getElementById('data-table-body');
@@ -618,13 +628,22 @@
             reversedData.forEach((d, index) => {
                 const row = document.createElement('tr');
                 row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
+                
+                // ▼▼▼ JavaScript変更点 ▼▼▼
                 const date = new Date(d.timestamp);
+                const year = date.getUTCFullYear();
+                const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+                const day = date.getUTCDate().toString().padStart(2, '0');
+                
                 let dateString;
-                 if (currentGranularity === '1d') {
-                    dateString = date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                if (currentGranularity === '1d') {
+                    dateString = `${year}/${month}/${day}`;
                 } else {
-                    dateString = date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const hours = date.getUTCHours().toString().padStart(2, '0');
+                    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+                    dateString = `${year}/${month}/${day} ${hours}:${minutes}`;
                 }
+                // ▲▲▲ JavaScript変更点 ▲▲▲
 
                 const formatChange = (change) => {
                     if (change === null || !isFinite(change)) return '-';
