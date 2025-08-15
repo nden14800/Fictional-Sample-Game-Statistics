@@ -77,9 +77,7 @@
         }
         /* Highcharts Tooltip Style */
         .highcharts-tooltip span {
-            /* ▼▼▼ CSS修正点 ▼▼▼ */
-            font-family: 'Roboto', sans-serif; /* !important を削除 */
-            /* ▲▲▲ CSS修正点 ▲▲▲ */
+            font-family: 'Roboto', sans-serif;
             background-color: #1f2937;
             border: 1px solid #374151;
             padding: 8px;
@@ -530,7 +528,6 @@
 
             const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
             
-            // ▼▼▼ JavaScript修正点1 ▼▼▼
             const theme = {
                 chart: {
                     backgroundColor: isLightMode ? '#ffffff' : '#2d3748',
@@ -541,7 +538,7 @@
                 xAxis: {
                     labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
                     title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
-                    lineColor: isLightMode ? '#ccd6eb' : '#4a5568' // X軸の線の色を追加
+                    lineColor: isLightMode ? '#ccd6eb' : '#4a5568'
                 },
                 yAxis: {
                     labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
@@ -549,7 +546,6 @@
                     gridLineColor: isLightMode ? '#e6e6e6' : '#4a5568'
                 }
             };
-            // ▲▲▲ JavaScript修正点1 ▲▲▲
 
             let series, yAxisOptions, title, tooltipFormatter;
             
@@ -560,14 +556,17 @@
                 return val;
             };
 
+            // ▼▼▼ JavaScript修正点 ▼▼▼
             const getChangeText = (change) => {
                 if (change !== null && isFinite(change)) {
                     const arrow = change >= 0 ? '▲' : '▼';
                     const color = change >= 0 ? '#10B981' : '#EF4444'; // Green, Red
-                    return `<span style="color: ${color}; margin-left: 8px; font-family: monospace;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                    // `font-family: monospace;` を削除してフォントを統一
+                    return `<span style="color: ${color}; margin-left: 8px;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
                 }
                 return '';
             };
+            // ▲▲▲ JavaScript修正点 ▲▲▲
 
             const baseTooltipFormatter = (point, y, seriesName, change) => {
                 const val = y.toLocaleString();
@@ -661,7 +660,6 @@
                         ...yAxisOptions.labels
                     }
                 },
-                // ▼▼▼ JavaScript修正点2 ▼▼▼
                 tooltip: {
                     shared: true,
                     useHTML: true,
@@ -672,7 +670,6 @@
                         color: isLightMode ? '#111827' : '#f9fafb'
                     }
                 },
-                // ▲▲▲ JavaScript修正点2 ▲▲▲
                 exporting: {
                     enabled: true,
                      buttons: {
