@@ -243,9 +243,7 @@
             </div>
         </div>
         <div class="mt-4">
-            <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
             <div id="highcharts-container"></div>
-            <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
         </div>
     </div>
 
@@ -279,7 +277,8 @@
 </div>
 <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
 <!-- Highcharts JS Libraries -->
-<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -584,7 +583,18 @@
             
             const options = {
                 ...theme,
+                chart: {
+                    ...theme.chart,
+                    zoomType: 'x' // ズーム機能を追加
+                },
                 title: { text: title },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false // マーカーを無効化
+                        }
+                    }
+                },
                 series: series,
                 xAxis: { type: 'datetime' },
                 yAxis: yAxisOptions,
@@ -593,13 +603,10 @@
                     useHTML: true,
                     formatter: tooltipFormatter
                 },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                scrollbar: { enabled: true },
                 credits: { enabled: false }
             };
 
-            chart = Highcharts.stockChart(chartContainer, options);
+            chart = Highcharts.chart(chartContainer, options);
         }
         // ▲▲▲ JavaScript変更点 (renderChart関数) ▲▲▲
 
