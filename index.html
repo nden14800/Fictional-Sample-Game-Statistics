@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>架空サンプルゲーム - 統計</title>
+    <title>架空サンプルゲーム - 統計 (Highcharts版)</title>
     <!-- Roboto Font Load -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,9 +75,24 @@
                 color: #ffffff;
             }
         }
-        .apexcharts-tooltip {
+        /* Highcharts Tooltip Style */
+        .highcharts-tooltip span {
             font-family: 'Roboto', sans-serif !important;
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            padding: 8px;
+            border-radius: 4px;
+            color: #f9fafb;
         }
+
+        @media (prefers-color-scheme: light) {
+            .highcharts-tooltip span {
+                background-color: #ffffff;
+                border: 1px solid #e5e7eb;
+                color: #111827;
+            }
+        }
+
         .active-btn {
             background-color: #3b82f6;
             color: white;
@@ -179,7 +194,6 @@
         <div class="flex flex-col space-y-4 mb-4">
             <div class="flex flex-wrap gap-2 items-center">
                 <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
-                <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
                 <div id="chart-type-buttons">
                     <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
                     <button data-chart="avg-ccu" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">平均CCU</button>
@@ -187,7 +201,6 @@
                     <button data-chart="cumulative-negative" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計低評価</button>
                     <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
                 </div>
-                <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
             </div>
             <div class="flex flex-wrap gap-2 items-center">
                 <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
@@ -229,8 +242,10 @@
                 <span id="date-range-info" class="text-xs text-gray-400"></span>
             </div>
         </div>
-        <div id="chart-container" class="mt-4">
-            <div id="apex-chart"></div>
+        <div class="mt-4">
+            <!-- ▼▼▼ HTML変更点 ▼▼▼ -->
+            <div id="highcharts-container"></div>
+            <!-- ▲▲▲ HTML変更点 ▲▲▲ -->
         </div>
     </div>
 
@@ -262,14 +277,16 @@
         </div>
     </div>
 </div>
-<!-- ApexCharts JS Library -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- ▼▼▼ HTML変更点 ▼▼▼ -->
+<!-- Highcharts JS Libraries -->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<!-- ▲▲▲ HTML変更点 ▲▲▲ -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
         let fullDailyData = [];
-        let fullInterpolatedData30m = []; // 全期間の30分粒度データをキャッシュ
-        let chart;
+        let fullInterpolatedData30m = [];
+        let chart; // Highcharts instance
         let currentGranularity = '1d';
         let activeChartType = 'ccu';
         let currentProcessedData = [];
@@ -351,7 +368,6 @@
 
         function createRatingDataPoint(date, ccu) {
             const isUpdateDay = date.getDate() === 1;
-            // Target: ~100M positive, ~1M negative over ~4 years (1460 days)
             let positiveRatingsBoost = isUpdateDay ? 1200000 : 0;
             let negativeRatingsBoost = isUpdateDay ? 5000 : 0;
             const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
@@ -465,90 +481,127 @@
             });
         }
 
+        // ▼▼▼ JavaScript変更点 (renderChart関数) ▼▼▼
         function renderChart(data) {
-            const chartContainer = document.querySelector("#apex-chart");
-            
+            const chartContainer = document.getElementById("highcharts-container");
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+
             if (!data || data.length === 0) {
-                if (chart) chart.updateSeries([]);
                 chartContainer.innerHTML = "";
                 return;
             }
-            
-            const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
-            const tooltipTheme = isLightMode ? 'light' : 'dark';
-            const gridBorderColor = isLightMode ? '#e2e8f0' : '#4a5568';
-            const labelColor = isLightMode ? '#333' : '#fff';
 
-            let series, yaxis, colors, title, stroke, chartType;
+            const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+            const theme = {
+                chart: {
+                    backgroundColor: isLightMode ? '#ffffff' : '#2d3748',
+                    style: { fontFamily: 'Roboto, sans-serif' }
+                },
+                title: { style: { color: isLightMode ? '#333333' : '#e2e8f0' } },
+                legend: { itemStyle: { color: isLightMode ? '#333333' : '#e2e8f0' } },
+                xAxis: { labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } }, title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } } },
+                yAxis: { labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } }, title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } }, gridLineColor: isLightMode ? '#e6e6e6' : '#4a5568' }
+            };
+
+            let series, yAxisOptions, title, tooltipFormatter;
             
-            const yAxisFormatter = function(val) {
+            const yAxisFormatter = function() {
+                const val = this.value;
                 if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
                 if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-                return val !== null && val !== undefined ? Math.round(val) : '0';
+                return val;
             };
-            
-            // ▼▼▼ JavaScript変更点 ▼▼▼
-            switch(activeChartType) {
+
+            const getChangeText = (change) => {
+                if (change !== null && isFinite(change)) {
+                    const arrow = change >= 0 ? '▲' : '▼';
+                    const color = change >= 0 ? '#10B981' : '#EF4444'; // Green, Red
+                    return `<span style="color: ${color}; margin-left: 8px; font-family: monospace;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+                }
+                return '';
+            };
+
+            switch (activeChartType) {
                 case 'ccu':
-                    chartType = 'line';
-                    series = [{ name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]) }];
-                    colors = ['#008FFB'];
+                    series = [{ name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]), color: '#008FFB' }];
                     title = 'CCU';
-                    stroke = { curve: 'smooth', width: 2.5 };
-                    yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } };
+                    yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
+                    tooltipFormatter = function() {
+                        const pointData = currentProcessedData[this.points[0].point.index];
+                        const val = this.y.toLocaleString();
+                        const changeText = getChangeText(pointData.ccuChange);
+                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                    };
                     break;
                 case 'avg-ccu':
-                    chartType = 'line';
-                    series = [{ name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]) }];
-                    colors = ['#00E396'];
+                    series = [{ name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]), color: '#00E396' }];
                     title = '14日間平均CCU';
-                    stroke = { curve: 'smooth', width: 2 };
-                    yaxis = { title: { text: 'ユーザー数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } };
+                    yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
+                    tooltipFormatter = function() {
+                        const pointData = currentProcessedData[this.points[0].point.index];
+                        const val = this.y.toLocaleString();
+                        const changeText = getChangeText(pointData.avgCcuChange);
+                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                    };
                     break;
-                case 'cumulative-positive': // 新しいグラフタイプを追加
-                    chartType = 'line';
-                    series = [{ name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]) }];
-                    colors = ['#00E396'];
+                case 'cumulative-positive':
+                    series = [{ name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]), color: '#00E396' }];
                     title = '合計高評価数';
-                    stroke = { curve: 'smooth', width: 2.5 };
-                    yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } };
+                    yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
+                    tooltipFormatter = function() {
+                        const pointData = currentProcessedData[this.points[0].point.index];
+                        const val = this.y.toLocaleString();
+                        const changeText = getChangeText(pointData.cumulativePositiveChange);
+                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                    };
                     break;
-                case 'cumulative-negative': // 新しいグラフタイプを追加
-                    chartType = 'line';
-                    series = [{ name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]) }];
-                    colors = ['#FF4560'];
+                case 'cumulative-negative':
+                    series = [{ name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]), color: '#FF4560' }];
                     title = '合計低評価数';
-                    stroke = { curve: 'smooth', width: 2.5 };
-                    yaxis = { title: { text: '合計評価数', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: yAxisFormatter } };
+                    yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
+                    tooltipFormatter = function() {
+                        const pointData = currentProcessedData[this.points[0].point.index];
+                        const val = this.y.toLocaleString();
+                        const changeText = getChangeText(pointData.cumulativeNegativeChange);
+                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                    };
                     break;
                 case 'ratio':
-                    chartType = 'line';
-                    series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]) }];
-                    colors = ['#FBBF24'];
+                    series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]), color: '#FBBF24' }];
                     title = '累積高評価率';
-                    stroke = { curve: 'smooth', width: 2.5 };
-                    yaxis = { title: { text: '高評価率 (%)', style: { color: labelColor } }, labels: { style: { colors: labelColor }, formatter: val => `${val.toFixed(1)}%` } };
+                    yAxisOptions = { title: { text: '高評価率 (%)' }, labels: { format: '{value:.1f}%' } };
+                     tooltipFormatter = function() {
+                        const pointData = currentProcessedData[this.points[0].point.index];
+                        const val = this.y.toFixed(2) + '%';
+                        const changeText = getChangeText(pointData.ratioChange);
+                        return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', this.x)}</b><br/>${this.series.name}: ${val} ${changeText}`;
+                    };
                     break;
             }
-            // ▲▲▲ JavaScript変更点 ▲▲▲
-
-            const options = {
-                series: series,
-                chart: { id: 'sample-game-chart', type: chartType, height: 400, toolbar: { show: true, autoSelected: 'zoom' }, background: isLightMode ? '#ffffff' : '#2d3748', fontFamily: 'Roboto, sans-serif' },
-                colors: colors,
-                stroke: stroke,
-                title: { text: title, align: 'left', style: { color: labelColor } },
-                xaxis: { type: 'datetime', labels: { datetimeUTC: false, format: currentGranularity === '1d' ? 'yy/MM/dd HH:mm' : 'MM/dd HH:mm', style: { colors: labelColor } }, tooltip: { enabled: true } },
-                yaxis: yaxis,
-                tooltip: { x: { format: 'yyyy/MM/dd HH:mm' }, theme: tooltipTheme, shared: true, intersect: false, y: { formatter: (val, opts) => { const { dataPointIndex, seriesIndex, w } = opts; const dataPoint = currentProcessedData[dataPointIndex]; if (!dataPoint) return val; let formattedValue = (val !== null && val !== undefined) ? Math.round(val).toLocaleString() : 'N/A'; let changeText = ''; let change = null; const seriesName = w.globals.seriesNames[seriesIndex]; switch (seriesName) { case 'CCU': change = dataPoint.ccuChange; break; case '平均CCU (14日)': change = dataPoint.avgCcuChange; break; case '合計高評価数': change = dataPoint.cumulativePositiveChange; break; case '合計低評価数': change = dataPoint.cumulativeNegativeChange; break; case '高評価率': change = dataPoint.ratioChange; formattedValue = `${val ? val.toFixed(2) : '0.00'}%`; break; } if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? 'text-green-400' : 'text-red-400'; changeText = `<span class="${color} ml-2 font-mono">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return `${formattedValue} ${changeText}`; } } },
-                dataLabels: { enabled: false },
-                legend: { position: 'top', horizontalAlign: 'right', labels: { colors: labelColor } },
-                grid: { borderColor: gridBorderColor },
-            };
             
-            if (chart) chart.updateOptions(options);
-            else { chart = new ApexCharts(chartContainer, options); chart.render(); }
+            const options = {
+                ...theme,
+                title: { text: title },
+                series: series,
+                xAxis: { type: 'datetime' },
+                yAxis: yAxisOptions,
+                tooltip: {
+                    shared: true,
+                    useHTML: true,
+                    formatter: tooltipFormatter
+                },
+                rangeSelector: { enabled: false },
+                navigator: { enabled: true },
+                scrollbar: { enabled: true },
+                credits: { enabled: false }
+            };
+
+            chart = Highcharts.stockChart(chartContainer, options);
         }
+        // ▲▲▲ JavaScript変更点 (renderChart関数) ▲▲▲
 
         function renderTable(data) {
             const tableBody = document.getElementById('data-table-body');
