@@ -219,19 +219,29 @@
     <!-- Chart section -->
     <div class="card p-6 rounded-xl shadow-lg">
         <div class="flex flex-col space-y-4 mb-4">
-            <div class="flex flex-wrap gap-2 items-center">
-                <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
-                <div id="chart-type-buttons">
-                    <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
-                    <button data-chart="avg-ccu" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">平均CCU</button>
-                    <button data-chart="cumulative-positive" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計高評価</button>
-                    <button data-chart="cumulative-negative" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計低評価</button>
-                    <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
+            <div class="flex flex-wrap gap-x-6 gap-y-2 items-center">
+                <div class="flex flex-wrap gap-2 items-center">
+                    <p class="text-gray-300 light-mode-text-black">グラフ形式:</p>
+                    <div id="chart-style-buttons">
+                        <button data-style="line" class="px-4 py-2 chart-style-btn active-btn font-bold rounded-lg transition-colors">折れ線</button>
+                        <button data-style="spline" class="px-4 py-2 chart-style-btn inactive-btn font-bold rounded-lg transition-colors">スプライン</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <p class="text-gray-300 light-mode-text-black">グラフの種類:</p>
+                    <div id="chart-type-buttons">
+                        <button data-chart="ccu" class="px-4 py-2 chart-type-btn active-btn font-bold rounded-lg transition-colors">CCU</button>
+                        <button data-chart="avg-ccu" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">平均CCU</button>
+                        <button data-chart="cumulative-positive" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計高評価</button>
+                        <button data-chart="cumulative-negative" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">合計低評価</button>
+                        <button data-chart="ratio" class="px-4 py-2 chart-type-btn inactive-btn font-bold rounded-lg transition-colors">高評価率</button>
+                    </div>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
                 <p class="text-gray-300 light-mode-text-black">表示粒度:</p>
                 <div id="granularity-buttons">
+                    <button data-granularity="10m" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">10分</button>
                     <button data-granularity="30m" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">30分</button>
                     <button data-granularity="1h" class="px-4 py-2 granularity-btn inactive-btn font-bold rounded-lg transition-colors">1時間</button>
                     <button data-granularity="1d" class="px-4 py-2 granularity-btn active-btn font-bold rounded-lg transition-colors">1日</button>
@@ -310,7 +320,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // Highchartsの時刻をグローバルにUTCに設定
         Highcharts.setOptions({
             time: {
                 useUTC: true
@@ -318,10 +327,11 @@
         });
 
         let fullDailyData = [];
-        let fullInterpolatedData30m = [];
-        let chart; // Highcharts instance
+        let fullInterpolatedData10m = [];
+        let chart;
         let currentGranularity = '1d';
         let activeChartType = 'ccu';
+        let activeChartStyle = 'line';
         let currentProcessedData = [];
 
         const datasetStartDate = new Date('2025-12-31T00:00:00Z');
@@ -332,7 +342,6 @@
             let currentTime = new Date(startDate);
             let cumulativePositive = 0;
             let cumulativeNegative = 0;
-            
             const ccuPoints = [
                 { date: new Date('2026-01-01'), ccu: 10000 },
                 { date: new Date('2027-01-01'), ccu: 8500000 },
@@ -340,7 +349,6 @@
                 { date: new Date('2029-01-01'), ccu: 5460000 },
                 { date: new Date('2030-01-01'), ccu: 4670000 }
             ];
-
             const ccuTimeline = {};
             for (let i = 0; i < ccuPoints.length - 1; i++) {
                 const startPoint = ccuPoints[i];
@@ -356,7 +364,11 @@
                     else if (startYear === 2027) baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
                     else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
                     else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
-                    const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
+                    
+                    // ▼▼▼ 修正点1: 日次データのノイズを10%から5%に低減 ▼▼▼
+                    const noise = (Math.random() - 0.5) * 0.05 * baseCcu; 
+                    // ▲▲▲ 修正点1 ▲▲▲
+
                     ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
                     currentDate.setDate(currentDate.getDate() + 1);
                     dayCount++;
@@ -389,7 +401,8 @@
         }
         
         function recalculateMovingAverageForInterpolatedData(data, dailyWindowSize = 14) {
-            const windowSize = dailyWindowSize * 48; // 14 days * 48 half-hours/day
+            const pointsPerDay = (24 * 60) / 10;
+            const windowSize = dailyWindowSize * pointsPerDay;
             return data.map((d, i, arr) => {
                 const start = Math.max(0, i - windowSize + 1);
                 const end = i + 1;
@@ -399,43 +412,30 @@
             });
         }
 
-        // ▼▼▼ JavaScript修正箇所 ▼▼▼
         function createRatingDataPoint(date, ccu) {
             const isUpdateDay = date.getDate() === 1;
-            
-            // 修正点: 高評価数のブースト係数をさらに半分に調整
-            let positiveRatingsBoost = isUpdateDay ? ccu * (0.1375 + Math.random() * 0.025) : 0; // CCUの約0.13倍〜0.16倍のブースト
-            let negativeRatingsBoost = isUpdateDay ? ccu * (0.004 + Math.random() * 0.002) : 0; // CCUの約0.4%〜0.6%のブースト
-
+            let positiveRatingsBoost = isUpdateDay ? ccu * (0.1375 + Math.random() * 0.025) : 0;
+            let negativeRatingsBoost = isUpdateDay ? ccu * (0.004 + Math.random() * 0.002) : 0;
             const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
             const dailyNegativeBase = ccu * (0.00008 + Math.random() * 0.00004);
-            
             return { 
                 positive: Math.floor(dailyPositiveBase + positiveRatingsBoost), 
                 negative: Math.floor(dailyNegativeBase + negativeRatingsBoost) 
             };
-        }
-        // ▲▲▲ JavaScript修正箇所 ▲▲▲
-
-
-        function filterDataByDateRange(allData, startDate, endDate) {
-            const startTimestamp = startDate.getTime();
-            const endTimestamp = endDate.getTime();
-            return allData.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
         }
 
         function interpolateData(dailyData) {
             if (dailyData.length <= 1) return dailyData;
             
             const interpolated = [];
-            const intervalMs = 30 * 60 * 1000;
+            const intervalMs = 10 * 60 * 1000;
 
             for (let i = 0; i < dailyData.length - 1; i++) {
                 const d1 = dailyData[i];
                 const d2 = dailyData[i + 1];
 
                 const isUpdateDay = new Date(d1.timestamp).getDate() === 1;
-                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000; // UTC 09:00 (JST 18:00)
+                const updatePeakTime = d1.timestamp + 9 * 3600 * 1000;
 
                 const intervalsForDay = [];
                 let tempTimestamp = d1.timestamp;
@@ -444,7 +444,11 @@
                     const dayProgress = ((tempTimestamp - d1.timestamp) % (24 * 3600 * 1000)) / (24 * 3600 * 1000);
                     const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
                     const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
-                    const randomNoise = (Math.random() - 0.5) * 0.1;
+                    
+                    // ▼▼▼ 修正点2: 補間データのノイズを10%から4%に低減 ▼▼▼
+                    const randomNoise = (Math.random() - 0.5) * 0.04;
+                    // ▲▲▲ 修正点2 ▲▲▲
+                    
                     let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
                     let ccuValue = baseCcuValue;
 
@@ -463,10 +467,8 @@
                 }
                 
                 const totalCcuForDay = intervalsForDay.reduce((sum, interval) => sum + interval.ccu, 0);
-                
                 const startCumulativePositive = d1.cumulativePositive - d1.positive;
                 const startCumulativeNegative = d1.cumulativeNegative - d1.negative;
-                
                 let dayAccumulatedPositive = 0;
                 let dayAccumulatedNegative = 0;
 
@@ -474,16 +476,14 @@
                     const ccuRatio = totalCcuForDay > 0 ? interval.ccu / totalCcuForDay : 0;
                     const positiveThisInterval = d1.positive * ccuRatio;
                     const negativeThisInterval = d1.negative * ccuRatio;
-                    
                     dayAccumulatedPositive += positiveThisInterval;
                     dayAccumulatedNegative += negativeThisInterval;
-
                     const currentCumulativePositive = startCumulativePositive + dayAccumulatedPositive;
                     const currentCumulativeNegative = startCumulativeNegative + dayAccumulatedNegative;
                     const totalRatings = currentCumulativePositive + currentCumulativeNegative;
                     const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
 
-                    const newPoint = {
+                    interpolated.push({
                         timestamp: interval.timestamp,
                         ccu: Math.floor(interval.ccu),
                         avgCcu: 0,
@@ -492,25 +492,15 @@
                         cumulativePositive: currentCumulativePositive,
                         cumulativeNegative: currentCumulativeNegative,
                         ratio: parseFloat(currentRatio.toFixed(2)),
-                    };
-                    interpolated.push(newPoint);
+                    });
                 }
             }
             if (dailyData.length > 0) {
                  const lastData = dailyData[dailyData.length-1];
                  const existingLast = interpolated.find(p => p.timestamp === lastData.timestamp);
-                 if(!existingLast) {
-                    interpolated.push(lastData);
-                 }
+                 if(!existingLast) interpolated.push(lastData);
             }
-            
-            return interpolated.map(p => ({
-                ...p,
-                positive: Math.round(p.positive),
-                negative: Math.round(p.negative),
-                cumulativePositive: Math.round(p.cumulativePositive),
-                cumulativeNegative: Math.round(p.cumulativeNegative)
-            }));
+            return interpolated.map(p => ({ ...p, positive: Math.round(p.positive), negative: Math.round(p.negative), cumulativePositive: Math.round(p.cumulativePositive), cumulativeNegative: Math.round(p.cumulativeNegative) }));
         }
         
         function calculatePercentageChange(data) {
@@ -531,171 +521,44 @@
 
         function renderChart(data) {
             const chartContainer = document.getElementById("highcharts-container");
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-
-            if (!data || data.length === 0) {
-                chartContainer.innerHTML = "";
-                return;
-            }
+            if (chart) { chart.destroy(); chart = null; }
+            if (!data || data.length === 0) { chartContainer.innerHTML = ""; return; }
 
             const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
-            
             const theme = {
-                chart: {
-                    backgroundColor: isLightMode ? '#ffffff' : '#2d3748',
-                    style: { fontFamily: 'Roboto, sans-serif' }
-                },
-                title: { style: { color: isLightMode ? '#333333' : '#e2e8f0' } },
-                legend: { itemStyle: { color: isLightMode ? '#333333' : '#e2e8f0' } },
-                xAxis: {
-                    labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
-                    title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
-                    lineColor: isLightMode ? '#ccd6eb' : '#4a5568'
-                },
-                yAxis: {
-                    labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
-                    title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' } },
-                    gridLineColor: isLightMode ? '#e6e6e6' : '#4a5568'
-                }
+                chart: { backgroundColor: isLightMode ? '#ffffff' : '#2d3748', style: { fontFamily: 'Roboto, sans-serif' }},
+                title: { style: { color: isLightMode ? '#333333' : '#e2e8f0' }},
+                legend: { itemStyle: { color: isLightMode ? '#333333' : '#e2e8f0' }},
+                xAxis: { labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' }}, title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' }}, lineColor: isLightMode ? '#ccd6eb' : '#4a5568'},
+                yAxis: { labels: { style: { color: isLightMode ? '#666666' : '#e2e8f0' }}, title: { style: { color: isLightMode ? '#666666' : '#e2e8f0' }}, gridLineColor: isLightMode ? '#e6e6e6' : '#4a5568'}
             };
 
-            let series, yAxisOptions, title, tooltipFormatter;
-            
-            const yAxisFormatter = function() {
-                const val = this.value;
-                if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-                if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-                return val;
-            };
-            
-            const getChangeText = (change) => {
-                if (change !== null && isFinite(change)) {
-                    const arrow = change >= 0 ? '▲' : '▼';
-                    const color = change >= 0 ? '#10B981' : '#EF4444'; // Green, Red
-                    return `<span style="color: ${color}; margin-left: 8px;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
-                }
-                return '';
-            };
-
-            const baseTooltipFormatter = (point, y, seriesName, change) => {
-                const val = y.toLocaleString();
-                const changeText = getChangeText(change);
-                return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${val} ${changeText}`;
-            };
-            const ratioTooltipFormatter = (point, y, seriesName, change) => {
-                const val = y.toFixed(2) + '%';
-                const changeText = getChangeText(change);
-                return `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${val} ${changeText}`;
-            };
+            let seriesData, yAxisOptions, title, tooltipFormatter;
+            const yAxisFormatter = function() { const val = this.value; if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'; if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K'; return val; };
+            const getChangeText = (change) => { if (change !== null && isFinite(change)) { const arrow = change >= 0 ? '▲' : '▼'; const color = change >= 0 ? '#10B981' : '#EF4444'; return `<span style="color: ${color}; margin-left: 8px;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`; } return ''; };
+            const baseTooltipFormatter = (point, y, seriesName, change) => `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${y.toLocaleString()} ${getChangeText(change)}`;
+            const ratioTooltipFormatter = (point, y, seriesName, change) => `<b>${Highcharts.dateFormat('%Y/%m/%d %H:%M', point.x)} (UTC)</b><br/>${seriesName}: ${y.toFixed(2)}% ${getChangeText(change)}`;
 
             switch (activeChartType) {
-                case 'ccu':
-                    series = [{ name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]), color: '#008FFB' }];
-                    title = 'CCU';
-                    yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
-                    tooltipFormatter = function() {
-                        const pointData = currentProcessedData[this.points[0].point.index];
-                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.ccuChange);
-                    };
-                    break;
-                case 'avg-ccu':
-                    series = [{ name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]), color: '#00E396' }];
-                    title = '14日間平均CCU';
-                    yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } };
-                    tooltipFormatter = function() {
-                        const pointData = currentProcessedData[this.points[0].point.index];
-                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.avgCcuChange);
-                    };
-                    break;
-                case 'cumulative-positive':
-                    series = [{ name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]), color: '#00E396' }];
-                    title = '合計高評価数';
-                    yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
-                    tooltipFormatter = function() {
-                        const pointData = currentProcessedData[this.points[0].point.index];
-                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.cumulativePositiveChange);
-                    };
-                    break;
-                case 'cumulative-negative':
-                    series = [{ name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]), color: '#FF4560' }];
-                    title = '合計低評価数';
-                    yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } };
-                    tooltipFormatter = function() {
-                        const pointData = currentProcessedData[this.points[0].point.index];
-                        return baseTooltipFormatter(this.points[0], this.y, this.series.name, pointData.cumulativeNegativeChange);
-                    };
-                    break;
-                case 'ratio':
-                    series = [{ name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]), color: '#FBBF24' }];
-                    title = '累積高評価率';
-                    yAxisOptions = { title: { text: '高評価率 (%)' }, labels: { format: '{value:.1f}%' } };
-                     tooltipFormatter = function() {
-                        const pointData = currentProcessedData[this.points[0].point.index];
-                        return ratioTooltipFormatter(this.points[0], this.y, this.series.name, pointData.ratioChange);
-                    };
-                    break;
+                case 'ccu': seriesData = { name: 'CCU', data: data.map(d => [d.timestamp, d.ccu]), color: '#008FFB' }; title = 'CCU'; yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } }; tooltipFormatter = function() { return baseTooltipFormatter(this.points[0], this.y, this.series.name, currentProcessedData[this.points[0].point.index].ccuChange); }; break;
+                case 'avg-ccu': seriesData = { name: '平均CCU (14日)', data: data.map(d => [d.timestamp, d.avgCcu]), color: '#00E396' }; title = '14日間平均CCU'; yAxisOptions = { title: { text: 'ユーザー数' }, labels: { formatter: yAxisFormatter } }; tooltipFormatter = function() { return baseTooltipFormatter(this.points[0], this.y, this.series.name, currentProcessedData[this.points[0].point.index].avgCcuChange); }; break;
+                case 'cumulative-positive': seriesData = { name: '合計高評価数', data: data.map(d => [d.timestamp, d.cumulativePositive]), color: '#00E396' }; title = '合計高評価数'; yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } }; tooltipFormatter = function() { return baseTooltipFormatter(this.points[0], this.y, this.series.name, currentProcessedData[this.points[0].point.index].cumulativePositiveChange); }; break;
+                case 'cumulative-negative': seriesData = { name: '合計低評価数', data: data.map(d => [d.timestamp, d.cumulativeNegative]), color: '#FF4560' }; title = '合計低評価数'; yAxisOptions = { title: { text: '合計評価数' }, labels: { formatter: yAxisFormatter } }; tooltipFormatter = function() { return baseTooltipFormatter(this.points[0], this.y, this.series.name, currentProcessedData[this.points[0].point.index].cumulativeNegativeChange); }; break;
+                case 'ratio': seriesData = { name: '高評価率', data: data.map(d => [d.timestamp, d.ratio]), color: '#FBBF24' }; title = '累積高評価率'; yAxisOptions = { title: { text: '高評価率 (%)' }, labels: { format: '{value:.1f}%' } }; tooltipFormatter = function() { return ratioTooltipFormatter(this.points[0], this.y, this.series.name, currentProcessedData[this.points[0].point.index].ratioChange); }; break;
             }
             
             const options = {
                 ...theme,
-                chart: {
-                    ...theme.chart,
-                    zoomType: 'x'
-                },
-                title: {
-                    ...theme.title,
-                    text: title
-                },
-                plotOptions: {
-                    series: {
-                        marker: {
-                            enabled: false
-                        }
-                    }
-                },
-                series: series,
-                xAxis: {
-                    ...theme.xAxis,
-                    type: 'datetime'
-                },
-                yAxis: {
-                    ...theme.yAxis,
-                    title: {
-                        ...theme.yAxis.title,
-                        ...yAxisOptions.title
-                    },
-                    labels: {
-                        ...theme.yAxis.labels,
-                        ...yAxisOptions.labels
-                    }
-                },
-                tooltip: {
-                    shared: true,
-                    useHTML: true,
-                    formatter: tooltipFormatter,
-                    backgroundColor: isLightMode ? '#ffffff' : '#1f2937',
-                    borderColor: isLightMode ? '#e5e7eb' : '#374151',
-                    style: {
-                        color: isLightMode ? '#111827' : '#f9fafb'
-                    }
-                },
-                exporting: {
-                    enabled: true,
-                     buttons: {
-                        contextButton: {
-                            symbolStroke: isLightMode ? '#666666' : '#e2e8f0',
-                            theme: {
-                                fill: isLightMode ? '#ffffff' : '#2d3748'
-                            }
-                        }
-                    }
-                },
+                chart: { ...theme.chart, zoomType: 'x' },
+                title: { ...theme.title, text: title },
+                plotOptions: { series: { marker: { enabled: false }}},
+                series: [{ ...seriesData, type: activeChartStyle }],
+                xAxis: { ...theme.xAxis, type: 'datetime' },
+                yAxis: { ...theme.yAxis, title: { ...theme.yAxis.title, ...yAxisOptions.title }, labels: { ...theme.yAxis.labels, ...yAxisOptions.labels }},
+                tooltip: { shared: true, useHTML: true, formatter: tooltipFormatter, backgroundColor: isLightMode ? '#ffffff' : '#1f2937', borderColor: isLightMode ? '#e5e7eb' : '#374151', style: { color: isLightMode ? '#111827' : '#f9fafb' }},
+                exporting: { enabled: true, buttons: { contextButton: { symbolStroke: isLightMode ? '#666666' : '#e2e8f0', theme: { fill: isLightMode ? '#ffffff' : '#2d3748' }}}},
                 credits: { enabled: false }
             };
-
             chart = Highcharts.chart(chartContainer, options);
         }
 
@@ -707,35 +570,11 @@
             reversedData.forEach((d, index) => {
                 const row = document.createElement('tr');
                 row.className = `transition-colors duration-200 ${index % 2 === 1 ? 'table-row-odd' : 'hover:bg-gray-700 light:hover:bg-gray-100'}`;
-                
                 const date = new Date(d.timestamp);
-                const year = date.getUTCFullYear();
-                const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-                const day = date.getUTCDate().toString().padStart(2, '0');
-                
-                let dateString;
-                if (currentGranularity === '1d') {
-                    dateString = `${year}/${month}/${day}`;
-                } else {
-                    const hours = date.getUTCHours().toString().padStart(2, '0');
-                    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-                    dateString = `${year}/${month}/${day} ${hours}:${minutes}`;
-                }
-
-                const formatChange = (change) => {
-                    if (change === null || !isFinite(change)) return '-';
-                    const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400';
-                    const arrow = change >= 0 ? '▲' : '▼';
-                    return `<span class="${colorClass}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
-                };
-                row.innerHTML = `
-                    <td class="p-3 text-sm">${dateString}</td>
-                    <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td>
-                    <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td>
-                    <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td>
-                    <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>
-                `;
+                let dateString = `${date.getUTCFullYear()}/${(date.getUTCMonth() + 1).toString().padStart(2, '0')}/${date.getUTCDate().toString().padStart(2, '0')}`;
+                if (currentGranularity !== '1d') dateString += ` ${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
+                const formatChange = (change) => { if (change === null || !isFinite(change)) return '-'; const colorClass = change >= 0 ? 'text-green-400' : 'text-red-400'; return `<span class="${colorClass}">${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</span>`; };
+                row.innerHTML = `<td class="p-3 text-sm">${dateString}</td> <td class="p-3 text-sm">${(d.ccu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.ccuChange)}</td> <td class="p-3 text-sm">${(d.avgCcu || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.avgCcuChange)}</td> <td class="p-3 text-sm">${(d.cumulativePositive || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativePositiveChange)}</td> <td class="p-3 text-sm">${(d.cumulativeNegative || 0).toLocaleString()}</td> <td class="p-3 text-sm">${formatChange(d.cumulativeNegativeChange)}</td> <td class="p-3 text-sm">${(d.ratio || 0).toFixed(2)}%</td> <td class="p-3 text-sm">${formatChange(d.ratioChange)}</td>`;
                 tableBody.appendChild(row);
             });
         }
@@ -762,46 +601,28 @@
             endDate.setUTCHours(23, 59, 59, 999);
             
             let processedData;
+            const startTimestamp = startDate.getTime();
+            const endTimestamp = endDate.getTime();
+            let filteredInterpolatedData = fullInterpolatedData10m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
+
             if (currentGranularity === '1d') {
                 processedData = [];
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    const dayStart = new Date(d);
-                    dayStart.setUTCHours(0, 0, 0, 0);
-                    const dayEnd = new Date(d);
-                    dayEnd.setUTCHours(23, 59, 59, 999);
-
-                    const dataForDay = fullInterpolatedData30m.filter(
-                        p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime()
-                    );
+                    const dayStart = new Date(d); dayStart.setUTCHours(0, 0, 0, 0);
+                    const dayEnd = new Date(d); dayEnd.setUTCHours(23, 59, 59, 999);
+                    const dataForDay = filteredInterpolatedData.filter(p => p.timestamp >= dayStart.getTime() && p.timestamp <= dayEnd.getTime());
                     if (dataForDay.length === 0) continue;
-
-                    let representativePoint = dataForDay.find(p => {
-                        const pointDate = new Date(p.timestamp);
-                        return pointDate.getUTCHours() === 9 && pointDate.getUTCMinutes() === 0;
-                    });
-                    if (!representativePoint) {
-                        representativePoint = dataForDay[dataForDay.length - 1];
-                    }
-                    
-                    processedData.push({
-                        timestamp: representativePoint.timestamp,
-                        ccu: representativePoint.ccu,
-                        avgCcu: representativePoint.avgCcu,
-                        cumulativePositive: representativePoint.cumulativePositive,
-                        cumulativeNegative: representativePoint.cumulativeNegative,
-                        ratio: representativePoint.ratio,
-                    });
+                    let representativePoint = dataForDay.find(p => new Date(p.timestamp).getUTCHours() === 9 && new Date(p.timestamp).getUTCMinutes() === 0) || dataForDay[dataForDay.length - 1];
+                    processedData.push(representativePoint);
                 }
             } else {
-                const startTimestamp = startDate.getTime();
-                const endTimestamp = endDate.getTime();
-                let filteredInterpolatedData = fullInterpolatedData30m.filter(d => d.timestamp >= startTimestamp && d.timestamp <= endTimestamp);
-
-                if (currentGranularity === '1h') {
-                    processedData = filteredInterpolatedData.filter((d, i) => new Date(d.timestamp).getMinutes() === 0);
-                } else { // 30m
-                    processedData = filteredInterpolatedData;
-                }
+                processedData = filteredInterpolatedData.filter(d => {
+                    const minutes = new Date(d.timestamp).getUTCMinutes();
+                    if (currentGranularity === '10m') return true;
+                    if (currentGranularity === '30m') return minutes % 30 === 0;
+                    if (currentGranularity === '1h') return minutes === 0;
+                    return false;
+                });
             }
 
             currentProcessedData = calculatePercentageChange(processedData);
@@ -810,59 +631,64 @@
             updateCounters(currentProcessedData);
         }
 
-        function updateActiveButton(buttons, activeIdentifier) {
-            buttons.forEach(btn => {
-                const btnIdentifier = btn.dataset.chart || btn.dataset.granularity || btn.dataset.days;
-                if (btnIdentifier === activeIdentifier) { btn.classList.add('active-btn'); btn.classList.remove('inactive-btn'); } 
-                else { btn.classList.add('inactive-btn'); btn.classList.remove('active-btn'); }
+        function updateActiveButton(containerSelector, activeIdentifier, datasetKey) {
+            document.querySelectorAll(`${containerSelector} button`).forEach(btn => {
+                btn.classList.toggle('active-btn', btn.dataset[datasetKey] === activeIdentifier);
+                btn.classList.toggle('inactive-btn', btn.dataset[datasetKey] !== activeIdentifier);
             });
         }
         
-        document.querySelectorAll('.chart-type-btn').forEach(button => button.addEventListener('click', () => {
-            if (button.disabled) return;
-            activeChartType = button.dataset.chart;
-            updateActiveButton(document.querySelectorAll('.chart-type-btn'), activeChartType);
+        document.getElementById('chart-style-buttons').addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button || button.disabled) return;
+            activeChartStyle = button.dataset.style;
+            updateActiveButton('#chart-style-buttons', activeChartStyle, 'style');
             updateUI();
-        }));
-        
-        document.querySelectorAll('.granularity-btn').forEach(button => button.addEventListener('click', () => {
-            currentGranularity = button.dataset.granularity;
-            updateActiveButton(document.querySelectorAll('.granularity-btn'), currentGranularity);
-            updateUI();
-        }));
+        });
 
-        const dateRangeContainer = document.getElementById('date-range-buttons');
-        const dateRangeButtons = dateRangeContainer.querySelectorAll('button');
+        document.getElementById('chart-type-buttons').addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button || button.disabled) return;
+            activeChartType = button.dataset.chart;
+            updateActiveButton('#chart-type-buttons', activeChartType, 'chart');
+            updateUI();
+        });
+        
+        document.getElementById('granularity-buttons').addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button || button.disabled) return;
+            currentGranularity = button.dataset.granularity;
+            updateActiveButton('#granularity-buttons', currentGranularity, 'granularity');
+            updateUI();
+        });
+        
         const startDatePicker = document.getElementById('start-date-picker');
         const endDatePicker = document.getElementById('end-date-picker');
-        const redrawButton = document.getElementById('redraw-chart-btn');
 
-        dateRangeContainer.addEventListener('click', (e) => {
+        document.getElementById('date-range-buttons').addEventListener('click', (e) => {
             const button = e.target.closest('button');
             if (!button) return;
             const days = button.dataset.days;
             startDatePicker.disabled = days !== 'custom';
             endDatePicker.disabled = days !== 'custom';
-            if (days === 'custom') { updateActiveButton(dateRangeButtons, 'custom'); return; }
+            updateActiveButton('#date-range-buttons', days, 'days');
+            if (days === 'custom') return;
             let startDate, endDate = new Date(datasetEndDate);
             if (days === 'all') startDate = new Date(datasetStartDate);
             else { startDate = new Date(datasetEndDate); startDate.setDate(datasetEndDate.getDate() - (parseInt(days, 10) - 1)); }
             startDatePicker.valueAsDate = startDate;
             endDatePicker.valueAsDate = endDate;
-            updateActiveButton(dateRangeButtons, days);
             updateUI();
         });
 
-        startDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        endDatePicker.addEventListener('change', () => { updateActiveButton(dateRangeButtons, 'custom'); updateUI(); });
-        redrawButton.addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
+        startDatePicker.addEventListener('change', () => { updateActiveButton('#date-range-buttons', 'custom', 'days'); updateUI(); });
+        endDatePicker.addEventListener('change', () => { updateActiveButton('#date-range-buttons', 'custom', 'days'); updateUI(); });
+        document.getElementById('redraw-chart-btn').addEventListener('click', () => { if (chart) { chart.destroy(); chart = null; } updateUI(); });
 
-        // --- データ生成と初期化 ---
         const dailyData = generateDailyData(datasetStartDate, datasetEndDate);
         fullDailyData = calculateMovingAverage(dailyData);
-        
         let interpolatedData = interpolateData(fullDailyData);
-        fullInterpolatedData30m = recalculateMovingAverageForInterpolatedData(interpolatedData);
+        fullInterpolatedData10m = recalculateMovingAverageForInterpolatedData(interpolatedData);
 
         document.getElementById('date-range-info').textContent = `データ期間: ${datasetStartDate.toLocaleDateString()} ~ ${datasetEndDate.toLocaleDateString()}`;
         document.querySelector('[data-days="all"]').click();
