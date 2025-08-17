@@ -364,11 +364,7 @@
                     else if (startYear === 2027) baseCcu = endPoint.ccu + (startPoint.ccu - endPoint.ccu) * (1 / (1 + Math.exp(10 * progress - 5)));
                     else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
                     else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
-                    
-                    // ▼▼▼ 修正点1: 日次データのノイズを非常に小さく(±0.5%)設定 ▼▼▼
-                    const noise = (Math.random() - 0.5) * 0.01 * baseCcu; 
-                    // ▲▲▲ 修正点1 ▲▲▲
-
+                    const noise = (Math.random() - 0.5) * 0.1 * baseCcu;
                     ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
                     currentDate.setDate(currentDate.getDate() + 1);
                     dayCount++;
@@ -401,7 +397,7 @@
         }
         
         function recalculateMovingAverageForInterpolatedData(data, dailyWindowSize = 14) {
-            const pointsPerDay = (24 * 60) / 10;
+            const pointsPerDay = (24 * 60) / 10; // 144 points for 10min granularity
             const windowSize = dailyWindowSize * pointsPerDay;
             return data.map((d, i, arr) => {
                 const start = Math.max(0, i - windowSize + 1);
@@ -428,7 +424,7 @@
             if (dailyData.length <= 1) return dailyData;
             
             const interpolated = [];
-            const intervalMs = 10 * 60 * 1000;
+            const intervalMs = 10 * 60 * 1000; // 10分間隔
 
             for (let i = 0; i < dailyData.length - 1; i++) {
                 const d1 = dailyData[i];
@@ -444,11 +440,7 @@
                     const dayProgress = ((tempTimestamp - d1.timestamp) % (24 * 3600 * 1000)) / (24 * 3600 * 1000);
                     const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
                     const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
-                    
-                    // ▼▼▼ 修正点2: 補間データのノイズを非常に小さく(±0.5%)設定 ▼▼▼
-                    const randomNoise = (Math.random() - 0.5) * 0.01;
-                    // ▲▲▲ 修正点2 ▲▲▲
-                    
+                    const randomNoise = (Math.random() - 0.5) * 0.1;
                     let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
                     let ccuValue = baseCcuValue;
 
