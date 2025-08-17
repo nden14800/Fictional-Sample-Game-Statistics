@@ -365,8 +365,8 @@
                     else if (startYear === 2028) baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * Math.sin(progress * Math.PI / 2);
                     else baseCcu = startPoint.ccu + (endPoint.ccu - startPoint.ccu) * progress;
                     
-                    // ▼▼▼ 修正点1: 日次データのノイズを10%から5%に低減 ▼▼▼
-                    const noise = (Math.random() - 0.5) * 0.05 * baseCcu; 
+                    // ▼▼▼ 修正点1: 日次データのノイズを非常に小さく(±0.5%)設定 ▼▼▼
+                    const noise = (Math.random() - 0.5) * 0.01 * baseCcu; 
                     // ▲▲▲ 修正点1 ▲▲▲
 
                     ccuTimeline[currentDate.toISOString().slice(0, 10)] = Math.max(10000, Math.floor(baseCcu + noise));
@@ -445,8 +445,8 @@
                     const diurnalFactor = 0.5 * Math.sin(dayProgress * 2 * Math.PI - Math.PI / 2) + 0.5;
                     const linearCcu = d1.ccu + (d2.ccu - d1.ccu) * ratio;
                     
-                    // ▼▼▼ 修正点2: 補間データのノイズを10%から4%に低減 ▼▼▼
-                    const randomNoise = (Math.random() - 0.5) * 0.04;
+                    // ▼▼▼ 修正点2: 補間データのノイズを非常に小さく(±0.5%)設定 ▼▼▼
+                    const randomNoise = (Math.random() - 0.5) * 0.01;
                     // ▲▲▲ 修正点2 ▲▲▲
                     
                     let baseCcuValue = linearCcu * (0.8 + diurnalFactor * 0.2) + linearCcu * randomNoise;
