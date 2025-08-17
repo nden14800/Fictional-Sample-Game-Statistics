@@ -399,14 +399,24 @@
             });
         }
 
+        // ▼▼▼ JavaScript修正箇所 ▼▼▼
         function createRatingDataPoint(date, ccu) {
             const isUpdateDay = date.getDate() === 1;
-            let positiveRatingsBoost = isUpdateDay ? 1200000 : 0;
-            let negativeRatingsBoost = isUpdateDay ? 5000 : 0;
+            
+            // 修正点: 高評価数のブースト係数をさらに半分に調整
+            let positiveRatingsBoost = isUpdateDay ? ccu * (0.1375 + Math.random() * 0.025) : 0; // CCUの約0.13倍〜0.16倍のブースト
+            let negativeRatingsBoost = isUpdateDay ? ccu * (0.004 + Math.random() * 0.002) : 0; // CCUの約0.4%〜0.6%のブースト
+
             const dailyPositiveBase = ccu * (0.005 + Math.random() * 0.005);
             const dailyNegativeBase = ccu * (0.00008 + Math.random() * 0.00004);
-            return { positive: Math.floor(dailyPositiveBase) + positiveRatingsBoost, negative: Math.floor(dailyNegativeBase) + negativeRatingsBoost };
+            
+            return { 
+                positive: Math.floor(dailyPositiveBase + positiveRatingsBoost), 
+                negative: Math.floor(dailyNegativeBase + negativeRatingsBoost) 
+            };
         }
+        // ▲▲▲ JavaScript修正箇所 ▲▲▲
+
 
         function filterDataByDateRange(allData, startDate, endDate) {
             const startTimestamp = startDate.getTime();
@@ -453,17 +463,23 @@
                 }
                 
                 const totalCcuForDay = intervalsForDay.reduce((sum, interval) => sum + interval.ccu, 0);
+                
+                const startCumulativePositive = d1.cumulativePositive - d1.positive;
+                const startCumulativeNegative = d1.cumulativeNegative - d1.negative;
+                
+                let dayAccumulatedPositive = 0;
+                let dayAccumulatedNegative = 0;
 
-                let lastKnownPoint = { ...d1 };
-                interpolated.push(lastKnownPoint);
-
-                for(const interval of intervalsForDay.slice(1)) {
+                for(const interval of intervalsForDay) {
                     const ccuRatio = totalCcuForDay > 0 ? interval.ccu / totalCcuForDay : 0;
                     const positiveThisInterval = d1.positive * ccuRatio;
                     const negativeThisInterval = d1.negative * ccuRatio;
                     
-                    const currentCumulativePositive = lastKnownPoint.cumulativePositive + positiveThisInterval;
-                    const currentCumulativeNegative = lastKnownPoint.cumulativeNegative + negativeThisInterval;
+                    dayAccumulatedPositive += positiveThisInterval;
+                    dayAccumulatedNegative += negativeThisInterval;
+
+                    const currentCumulativePositive = startCumulativePositive + dayAccumulatedPositive;
+                    const currentCumulativeNegative = startCumulativeNegative + dayAccumulatedNegative;
                     const totalRatings = currentCumulativePositive + currentCumulativeNegative;
                     const currentRatio = totalRatings > 0 ? (currentCumulativePositive / totalRatings) * 100 : 0;
 
@@ -478,7 +494,6 @@
                         ratio: parseFloat(currentRatio.toFixed(2)),
                     };
                     interpolated.push(newPoint);
-                    lastKnownPoint = { ...newPoint };
                 }
             }
             if (dailyData.length > 0) {
@@ -497,7 +512,7 @@
                 cumulativeNegative: Math.round(p.cumulativeNegative)
             }));
         }
-
+        
         function calculatePercentageChange(data) {
             const initialNulls = { ccuChange: null, avgCcuChange: null, cumulativePositiveChange: null, cumulativeNegativeChange: null, ratioChange: null };
             if (data.length <= 1) return data.map(d => ({ ...d, ...initialNulls }));
@@ -555,18 +570,15 @@
                 if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
                 return val;
             };
-
-            // ▼▼▼ JavaScript修正点 ▼▼▼
+            
             const getChangeText = (change) => {
                 if (change !== null && isFinite(change)) {
                     const arrow = change >= 0 ? '▲' : '▼';
                     const color = change >= 0 ? '#10B981' : '#EF4444'; // Green, Red
-                    // `font-family: monospace;` を削除してフォントを統一
                     return `<span style="color: ${color}; margin-left: 8px;">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
                 }
                 return '';
             };
-            // ▲▲▲ JavaScript修正点 ▲▲▲
 
             const baseTooltipFormatter = (point, y, seriesName, change) => {
                 const val = y.toLocaleString();
