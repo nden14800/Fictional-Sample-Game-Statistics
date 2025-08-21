@@ -614,19 +614,50 @@
             } else if (currentGranularity === '1w') {
                 processedData = [];
                 if (filteredInterpolatedData.length > 0) {
-                    let weeklyData = {};
+                    const weeklyDataGroups = {};
                     filteredInterpolatedData.forEach(d => {
-                        const date = new Date(d.timestamp);
-                        const day = date.getUTCDay();
-                        const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1); // 月曜日を週の始まりとする (Sunday=0, Monday=1...)
-                        const weekStart = new Date(date.setUTCDate(diff));
-                        weekStart.setUTCHours(0, 0, 0, 0);
-                        const weekStartTimestamp = weekStart.getTime();
-                        
-                        // その週の最後のデータで上書きする
-                        weeklyData[weekStartTimestamp] = d;
+                        const tempDate = new Date(d.timestamp);
+                        // 週の開始日（月曜日）を計算
+                        const day = tempDate.getUTCDay(); // Sun=0, Mon=1, ...
+                        const diff = tempDate.getUTCDate() - day + (day === 0 ? -6 : 1);
+                        tempDate.setUTCDate(diff);
+                        tempDate.setUTCHours(0, 0, 0, 0);
+                        const weekKey = tempDate.getTime();
+
+                        if (!weeklyDataGroups[weekKey]) {
+                            weeklyDataGroups[weekKey] = [];
+                        }
+                        weeklyDataGroups[weekKey].push(d);
                     });
-                    processedData = Object.values(weeklyData).sort((a, b) => a.timestamp - b.timestamp);
+
+                    const sortedWeekKeys = Object.keys(weeklyDataGroups).sort((a, b) => a - b);
+                    
+                    sortedWeekKeys.forEach(weekKey => {
+                        const dataForWeek = weeklyDataGroups[weekKey];
+                        
+                        // 週の代表日を日曜日 (getUTCDay() === 0) とする
+                        const sundayData = dataForWeek.filter(p => new Date(p.timestamp).getUTCDay() === 0);
+                        
+                        let representativePoint = null;
+                        if (sundayData.length > 0) {
+                             // 日曜日の9:00 (UTC) のデータを探す
+                             representativePoint = sundayData.find(p => new Date(p.timestamp).getUTCHours() === 9 && new Date(p.timestamp).getUTCMinutes() === 0);
+                             
+                             // 9:00のデータがなければ、日曜日の最後のデータを使用
+                             if (!representativePoint) {
+                                 representativePoint = sundayData[sundayData.length - 1];
+                             }
+                        }
+                        
+                        // 週に日曜日のデータがなければ、その週の最後のデータを使用
+                        if (!representativePoint) {
+                            representativePoint = dataForWeek[dataForWeek.length - 1];
+                        }
+
+                        if (representativePoint) {
+                            processedData.push(representativePoint);
+                        }
+                    });
                 }
             } else {
                 processedData = filteredInterpolatedData.filter(d => {
